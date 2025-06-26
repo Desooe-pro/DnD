@@ -1,11 +1,12 @@
-import random, sys, pygame_widgets, pygame as pg, PhrasesFR as PFR
+import random, sys, pygame_widgets, pygame as pg, config as config
 
 from pygame_widgets.slider import Slider
 from pygame_widgets.textbox import TextBox
 from pygame_widgets.progressbar import ProgressBar
 
+dataConfig = config.charger_config()
 pg.init()
-screen = pg.display.set_mode((1280, 720), pg.RESIZABLE)
+screen = pg.display.set_mode((int(dataConfig["width"]), int(dataConfig["height"])), pg.RESIZABLE)
 clock = pg.time.Clock()
 running = True
 running2 = True
@@ -20,179 +21,9 @@ width = screen.get_width()
 height = screen.get_height()
 replay = False
 ask = False
-phrasesClass = {
-  "banshee": {
-    "Name": "Banshee",
-    "Hist": [
-      "Vous arrivez dans une clairière illuminée par la lumière de la nuit et vous réjouissez d'être enfin dans un endroit traquille",
-      "Après avoir mangé vous vous mettez au coin du feu, puis allez vous coucher",
-      "Au beau millieu de la nuit vous vous reveillez sans savoir pourquoi vous avez cru enttendre un cri, mais plus aucun signe donc vous vous rendormez",
-      "A peine rendormie que vous entendez à nouveau ce cri...",
-      "Vous sortez de votre abri de fortune et vous retrouvez dans un épais brouillard",
-      "Vous entendez des cries venant de toutes les directions",
-      "Le brouillard semble se mettre à se concentrer en un point et commence à former une silouhette",
-      "Vous vous retrouvez en face à face avec une banshee"
-      ],
-    "attack": {
-      "noTarget": "Il n'y a aucun joueur à attaquer.",
-      "prepare": "La banshee prépare son attaque",
-      "norm": {
-        "bas": ["La banshee attaque le joueur ", " en consommant peu de mana et lui inflige ", " dégâts"],
-        "moy": ["La banshee attaque le joueur ", " en consommant une grande quantitée de mana et lui inflige ", " dégâts"],
-        "haut": ["La banshee sacrifie ses points de vie restant pour infliger ", " dégâts à tous les joueurs"],
-        "noHaut": [
-          "La banshee a essayé de lancer son attaque la plus puissante en sacrifiant ces points de vie restant mais elle n'était pas assez affaiblie pour cette attaque et inflige donc ",
-          " dégâts à tous les joueurs"
-          ]
-        },
-      },
-      "defense": {
-        "succes": ["Vous avez frappé dans la faille du bouclier de la banshee, elle subit donc les dégats de plein fouet équivalent à ", " dégâts"],
-        "fail": ["La banshee diminue les dégats reçus de 50 points avec son bouclier magique et subit ", " dégâts"],
-      },
-      "infoBox": {
-        "pv": " PV",
-        "stats": "Stats :",
-        "strength": "Force :",
-        "defense": "Défense :",
-        "mana": "Mana :",
-        "precision": "Précision :"
-        },
-      "Fight": {
-        "Lose": ["Les cries de la banshee ont réduit en charpie tous les aventuriers", "Fin de la partie"],
-        "HalfWin": "Vous avez gagnez au prix de la vie de vos camarades",
-        "Win": "Félicitations, vous avez vaincu la banshee"
-        }
-    },
-  "NW": {
-    "Name": "Marcheur de la nuit",
-    "Hist": [
-      "Vous arrivez dans une salle obscure, plus obscure que la nuit la plus noir de toute votre vie",
-      "Sortant de cette obscurité vous pouvez appercevoir celui que vous allez combattre",
-      "L'ancien chevalier à l'armure noir, mort il y a de cela bien des années",
-      "Le marcheur de la nuit"
-      ],
-    "attack": {
-      "crit": {
-        "phy": ["Le marcheur de la nuit attaque ", " rapidement et lui inflige un coup critique de ", " dégâts"],
-        "reinf": ["Le marcheur de la nuit attaque ", " avec un objet lourd trouvé à coté faisant preuve d'une force surprenante et lui inflige ", " dégâts"],
-        "mag": ["Le marcheur de la nuit attaque ", " rapidement et lui inflige un coup critique de ", " dégâts avant de disparaitre dans l'obsurité"]
-        },
-      "norm": {
-        "phy": ["Le marcheur de la nuit attaque ", " rapidement et lui inflige ", " dégâts"],
-        "reinf": ["Le marcheur de la nuit attaque ", " avec un objet lourd trouvé à coté et lui inflige ", " dégâts"],
-        "mag": ["Le marcheur de la nuit attaque ", " rapidement et lui inflige ", " dégâts avant de disparaitre dans l'obsurité"]
-        },
-      "noTarget": "Il n'y a aucun joueur à attaquer.",
-      "prepare": "Le marcheur de la nuit prépare son attaque",
-      "fail": "Le marcheur de la nuit rate son attaque",
-      },
-    "defense": {
-      "crit": {
-        "phy": ["Le marcheur de la nuit parvient à faire la meilleure défence possible et défend ", " de dégâts"],
-        "reinf": ["Le marcheur de la nuit se défend et utilise de la mana afin de transformer de nombreuses parties de son corps en obscuritée et défend ", " de dégâts"],
-        "mag": "Le marcheur de la nuit transorme l'entièreté de son corps en ombre évite tout les dégâts"
-        },
-      "norm": {
-        "phy": ["Le marcheur de la nuit parvient à effectuer une très bonne défense et pare ", " dégâts"],
-        "reinf": ["Le marcheur de la nuit se défend et utilise de la mana afin de transformer certaines parties de son corps en obscuritée et défend ", " de dégâts"],
-        "mag": ["Le marcheur de la nuit transorme de nombreuses parties de son corps en ombre évite ", " dégâts"]
-        },
-      "prepare": "Le marcheur de la nuit prépare sa défense",
-      "shadowEscape": "Le marcheur de la nuit se déplace trop vite dans l'obscuritée et parvient à éviter vos attaques",
-      "fail": "Le marcheur de la nuit rate sa défense",
-    },
-    "infoBox": {
-        "pv": " PV",
-        "stats": "Stats :",
-        "strength": "Force :",
-        "defense": "Défense :",
-        "mana": "Mana :",
-        "precision": "Précision :",
-        "ombre" : "Ombre :"
-        },
-    "Fight": {
-        "Lose": ["Les ténèbres ont engloutie tous les joueurs", "Fin de la partie"],
-        "HalfWin": "Vous avez gagnez au prix de la vie de vos camarades",
-        "Win": "Félicitations, vous avez vaincu le marcheur de la nuit"
-        }
-    },
-  "J": {
-    "attack": {
-      "crit": {
-        "phy": ["Vous infligez ", " de dégats physique sur un coup critique"],
-        "reinf": ["Vous infligez ", " de dégats physique sur un coup critique grâce à votre attaque renforcée au mana"],
-        "mag": ["Vous infligez ", " de dégats sur un coup critique avec votre attaque magique"]
-        },
-      "norm": {
-        "phy": ["Vous infligez ", " de dégats physique"],
-        "reinf": ["Vous infligez ", " de dégats grâce à votre attaque renforcée au mana"],
-        "mag": ["Vous infligez ", " de dégats avec votre attaque magique"]
-        },
-      "fail": "Vous avez raté votre attaque",
-      "attackType": ["Physique", "Renforcée", "Magique"]
-    },
-    "defense": {
-      "crit": {
-        "phy": ["Vous défendez ", " de dégats physique sur une défense parfaitement réussi"],
-        "reinf": ["Vous défendez ", " de dégats sur une défense enchanté des plus magnifiques"],
-        "mag": ["Vous défendez ", " de dégats sur une défense magique digne des plus grands mages"]
-        },
-      "norm": {
-        "phy": ["Vous défendez ", " de dégats physique"],
-        "reinf": ["Vous défendez ", " de dégats grâce à votre défense enchantée"],
-        "mag": ["Vous défendez ", " de dégats avec votre défense magique"]
-        },
-      "fail": "Votre défense à raté et vous prenez l'attaque de plein fouet",
-      "defenseType": ["Physique", "Enchantée", "Magique"]
-    },
-    "selection": {
-      "atk": ["Veuillez séléctionner votre attaque ? ", "Vous allez utiliser une attaque ", ""],
-      "def": ["Veuillez séléctionner votre défense ? ", "Vous allez utiliser une défense ", ""],
-      "mana": ["Quelle quantité de mana souhaitez-vous utiliser ? ", ["Vous allez utiliser ", " points de mana"]]
-      },
-    "infoBox": {
-      "pv": " PV",
-      "stats": "Stats :",
-      "strength": "Force :",
-      "defense": "Défense :",
-      "mana": "Mana :",
-      "precision": "Précision :"
-      },
-    "info": {
-      "attack": ["Une attaque physique n'utilise pas de mana, une attaque renforcée utilise entre 1 et 50 de mana et une attaque magique entre 51 et 500 de mana (:"],
-      "defense": ["Une défense physique n'utilise pas de mana, une défense enchantée utilise entre 1 et 50 de mana et une défense magique entre 51 et 500 de mana (:"]
-      }
-    },
-  "Bouton": {
-    "Play": "Jouer",
-    "Quit": "Quitter",
-    "Rules": "Compris",
-    "Validate": "Valider",
-    "BTN1": "1 Joueur",
-    "BTN2": "2 Joueurs",
-    "BTN3": "3 Joueurs",
-    "BTN4": "4 Joueurs",
-    },
-  "Creation": {
-    "NbPerso": ["Combien de joueurs voulez-vous créer ? (4 max)", "Vous avez choisi de jouer à : "],
-    "Name": ["Quel est votre nom, aventurier ? ", "Votre nom est : "],
-    "PV": ["Combien de points de vie avez vous ? ", ["Vous avez ", " PV"]],
-    "Mana": ["Quelle est la taille de votre réserve de mana ?", ["Vous avez ", " mana"]],
-    "Stats": {
-      "Question": "Quelles sont vos statistiques ? (Force / Défense / Précision)",
-      "Response": {
-        "Str": ["Vous avez ", " points de force"],
-        "Def": ["Vous avez ", " points de défense"],
-        "Prec": ["Vous avez ", " % de précision"]
-        }
-      }
-    },
-  "Boucle": {
-    "Question": "Voullez-vous lancer une nouvelle partie ?",
-    "Possibility": ["Oui", "Non"]
-    }
-  }
+
+volume = dataConfig["volume"]
+phrasesClass = config.load_phrases(dataConfig["langue"])
 
 class J :
   """
@@ -806,7 +637,6 @@ class Night_walker :
   def choose_target(self,liste_joueur) :
     if not liste_joueur :
       print("Il n'y a aucun joueur à attaquer.")
-      return None
 
     target = liste_joueur[0]
 
@@ -815,111 +645,124 @@ class Night_walker :
         target = joueur.nom
     return(target)
 
-  def attack(self,target,liste_joueur) :
-    crit = random.randint(1,100)
-    attatype = random.randint(1,100)
+  def attack(self, target, liste_joueur):
+    crit = random.randint(1, 100)
+    attatype = random.randint(1, 100)
+    degats = 0
     pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
-    self.affiche_texte("Le marcheur de la nuit prépare son attaque", liste_joueur, 3)
-    pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
-
-    if 100 - (35 - self.prec) < crit <= 100 :
-      self.affiche_texte("Le marcheur de la nuit rate son attaque", liste_joueur, 4)
-
-    elif 0 < crit <= self.prec :
-      if 0 < attatype <= 60 :
-        degats = self.force * 7.5
-        self.mana += len(liste_joueur) * 100
-        self.affiche_texte("Le marcheur de la nuit attaque " + str(target.getnom()) + " rapidement et lui inflige un coup critique de " + str(degats) + " dégâts", liste_joueur, 4)
-        return(degats)
-
-      elif 60 < attatype <= 95 and self.objet_lourd > 0 :
-        degats = self.force * 15
-        self.affiche_texte("Le marcheur de la nuit attaque " + str(target.getnom()) + " avec un objet lourd trouvé à coté faisant preuve d'une force surprenante et lui inflige " + str(degats) + " dégâts", liste_joueur, 4)
-        self.objet_lourd -= 1
-        for joueur in liste_joueur : 
-          joueur.boite_info()
-        self.boite_info()
-        pg.display.flip()
-        pg.time.delay(4000)
-        return(degats)
-
-      elif 95 < attatype <= 100 :
-        degats = self.force * 7.5
-        self.ombre += len(liste_joueur)
-        self.affiche_texte("Le marcheur de la nuit attaque " + str(target.getnom()) + " rapidement et lui inflige un coup critique de " + str(degats) + " dégâts avant de disparaitre dans l'obsurité", liste_joueur, 4)
-        return(degats)
-
-    else :
-      if 0 < attatype <= 60 :
-        degats = self.force * 5
-        self.mana += len(liste_joueur) * 50
-        self.affiche_texte("Le marcheur de la nuit attaque " + str(target.getnom()) + " rapidement et lui inflige " + str(degats) + " dégâts", liste_joueur, 4)
-        return(degats)
-
-      elif 60 < attatype <= 95 and self.objet_lourd > 0 :
-        degats = self.force * 7.5
-        self.affiche_texte("Le marcheur de la nuit attaque " + str(target.getnom()) + " avec un objet lourd trouvé à coté et lui inflige " + str(degats) + " dégâts", liste_joueur, 4)
-        self.objet_lourd -= 1
-        return(degats)
-
-      elif 95 < attatype <= 100 :
-        degats = self.force * 5
-        self.ombre += len(liste_joueur)
-        self.affiche_texte("Le marcheur de la nuit attaque " + str(target.getnom()) + " rapidement et lui inflige " + str(degats) + " dégâts avant de disparaitre dans l'obsurité", liste_joueur, 4)
-        return(degats)
-
-  def defences(self,degats,liste_joueur) :
-    crit = random.randint(1,100)
-    deftype = random.randint(1,100)
-    pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
-    self.affiche_texte("Le marcheur de la nuit prépare sa défense", liste_joueur, 3)
+    self.affiche_texte(phrasesClass["NW"]["attack"]["prepare"], liste_joueur, 3)
     pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
 
-    if self.ombre >= 1 :
-      self.affiche_texte("Le marcheur de la nuit se déplace trop vite dans l'obscuritée et parvient à éviter vos attaques", liste_joueur, 3)
-      self.ombre -= 1
+    if 100 - (35 - self.prec) < crit <= 100:
+        self.affiche_texte(phrasesClass["NW"]["attack"]["fail"], liste_joueur, 4)
 
-    elif 100 - (35 - self.prec) < crit <= 100 and self.ombre == 0 :
-      self.affiche_texte("Le marcheur de la nuit rate sa défense", liste_joueur, 3)
+    elif 0 < crit <= self.prec:
+        if 0 < attatype <= 60:
+            degats = self.force * 7.5
+            self.mana += len(liste_joueur) * 100
+            self.affiche_texte(phrasesClass["NW"]["attack"]["crit"]["phy"][0] + str(target.getnom()) +
+                               phrasesClass["NW"]["attack"]["crit"]["phy"][1] + str(degats) +
+                               phrasesClass["NW"]["attack"]["crit"]["phy"][2], liste_joueur, 4)
 
+        elif 60 < attatype <= 95 and self.objet_lourd > 0:
+            degats = self.force * 15
+            self.affiche_texte(phrasesClass["NW"]["attack"]["crit"]["reinf"][0] + str(target.getnom()) +
+                               phrasesClass["NW"]["attack"]["crit"]["reinf"][1] + str(degats) +
+                               phrasesClass["NW"]["attack"]["crit"]["reinf"][2], liste_joueur, 4)
+            self.objet_lourd -= 1
+            for joueur in liste_joueur:
+                joueur.boite_info()
+            self.boite_info()
+            pg.display.flip()
+            pg.time.delay(4000)
 
-    elif 0 < crit <= self.prec and self.ombre == 0 :
-      if 0 < deftype <= 60 :
-        degats_def = self.defence * 10
-        self.affiche_texte("Le marcheur de la nuit parvient à faire la meilleure défence possible et défend " + str(degats_def) + " de dégâts", liste_joueur, 3)
-        self.pv -= degats - degats_def
+        elif 95 < attatype <= 100:
+            degats = self.force * 7.5
+            self.ombre += len(liste_joueur)
+            self.affiche_texte(phrasesClass["NW"]["attack"]["crit"]["mag"][0] + str(target.getnom()) +
+                               phrasesClass["NW"]["attack"]["crit"]["mag"][1] + str(degats) +
+                               phrasesClass["NW"]["attack"]["crit"]["mag"][2], liste_joueur, 4)
 
-      if 60 < deftype <= 95 :
-        degats_def = self.defence * 7.5 + 100
-        self.affiche_texte("Le marcheur de la nuit se défend et utilise de la mana afin de transformer de nombreuses parties de son corps en obscuritée et défend " + str(degats_def) + " de dégâts", liste_joueur, 3)
-        self.pv -=  degats - degats_def
-        self.mana -= 100
+    else:
+        if 0 < attatype <= 60:
+            degats = self.force * 5
+            self.mana += len(liste_joueur) * 50
+            self.affiche_texte(phrasesClass["NW"]["attack"]["norm"]["phy"][0] + str(target.getnom()) +
+                               phrasesClass["NW"]["attack"]["norm"]["phy"][1] + str(degats) +
+                               phrasesClass["NW"]["attack"]["norm"]["phy"][2], liste_joueur, 4)
 
-      if 95 < deftype <= 100 :
-        self.affiche_texte("Le marcheur de la nuit transorme l'entièreté de son corps en ombre évite tout les dégâts", liste_joueur, 3)
-        self.ombre += len(liste_joueur)
-        self.mana -= 250
+        elif 60 < attatype <= 95 and self.objet_lourd > 0:
+            degats = self.force * 7.5
+            self.affiche_texte(phrasesClass["NW"]["attack"]["norm"]["reinf"][0] + str(target.getnom()) +
+                               phrasesClass["NW"]["attack"]["norm"]["reinf"][1] + str(degats) +
+                               phrasesClass["NW"]["attack"]["norm"]["reinf"][2], liste_joueur, 4)
+            self.objet_lourd -= 1
 
-    elif self.ombre == 0 :
-      if 0 < deftype <= 60 :
-        degats_def = self.defence * 5
-        self.affiche_texte("Le marcheur de la nuit parvient à effectuer une très bonne défense et pare " + str(degats_def) + " dégâts", liste_joueur, 3)
-        self.pv -= degats - degats_def
+        elif 95 < attatype <= 100:
+            degats = self.force * 5
+            self.ombre += len(liste_joueur)
+            self.affiche_texte(phrasesClass["NW"]["attack"]["norm"]["mag"][0] + str(target.getnom()) +
+                               phrasesClass["NW"]["attack"]["norm"]["mag"][1] + str(degats) +
+                               phrasesClass["NW"]["attack"]["norm"]["mag"][2], liste_joueur, 4)
+    return degats
 
-      if 60 < deftype <= 95 :
-        degats_def = self.defence * 4 + 100
-        self.affiche_texte("Le marcheur de la nuit se défend et utilise de la mana afin de transformer certaines parties de son corps en obscuritée et défend " + str(degats_def) + " de dégâts", liste_joueur, 3)
-        self.pv -=  degats - degats_def
-        self.mana -= 100
+  def defences(self, degats, liste_joueur):
+    crit = random.randint(1, 100)
+    deftype = random.randint(1, 100)
+    pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
+    self.affiche_texte(phrasesClass["NW"]["defense"]["prepare"], liste_joueur, 3)
+    pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
 
-      if 95 < deftype <= 100 :
-        degats_def = degats * 0.75
-        self.affiche_texte("Le marcheur de la nuit transorme de nombreuses parties de son corps en ombre évite " + str(degats_def) + " dégâts", liste_joueur, 3)
-        self.pv -= degats - degats_def
-        self.mana -= 250
+    if self.ombre >= 1:
+        self.affiche_texte(phrasesClass["NW"]["defense"]["shadowEscape"], liste_joueur, 3)
+        self.ombre -= 1
+
+    elif 100 - (35 - self.prec) < crit <= 100 and self.ombre == 0:
+        self.affiche_texte(phrasesClass["NW"]["defense"]["fail"], liste_joueur, 3)
+
+    elif 0 < crit <= self.prec and self.ombre == 0:
+        if 0 < deftype <= 60:
+            degats_def = self.defence * 10
+            self.affiche_texte(phrasesClass["NW"]["defense"]["crit"]["phy"][0] + str(degats_def) +
+                               phrasesClass["NW"]["defense"]["crit"]["phy"][1], liste_joueur, 3)
+            self.pv -= degats - degats_def
+
+        elif 60 < deftype <= 95:
+            degats_def = self.defence * 7.5 + 100
+            self.affiche_texte(phrasesClass["NW"]["defense"]["crit"]["reinf"][0] + str(degats_def) +
+                               phrasesClass["NW"]["defense"]["crit"]["reinf"][1], liste_joueur, 3)
+            self.pv -= degats - degats_def
+            self.mana -= 100
+
+        elif 95 < deftype <= 100:
+            self.affiche_texte(phrasesClass["NW"]["defense"]["crit"]["mag"], liste_joueur, 3)
+            self.ombre += len(liste_joueur)
+            self.mana -= 250
+
+    elif self.ombre == 0:
+        if 0 < deftype <= 60:
+            degats_def = self.defence * 5
+            self.affiche_texte(phrasesClass["NW"]["defense"]["norm"]["phy"][0] + str(degats_def) +
+                               phrasesClass["NW"]["defense"]["norm"]["phy"][1], liste_joueur, 3)
+            self.pv -= degats - degats_def
+
+        elif 60 < deftype <= 95:
+            degats_def = self.defence * 4 + 100
+            self.affiche_texte(phrasesClass["NW"]["defense"]["norm"]["reinf"][0] + str(degats_def) +
+                               phrasesClass["NW"]["defense"]["norm"]["reinf"][1], liste_joueur, 3)
+            self.pv -= degats - degats_def
+            self.mana -= 100
+
+        elif 95 < deftype <= 100:
+            degats_def = degats * 0.75
+            self.affiche_texte(phrasesClass["NW"]["defense"]["norm"]["mag"][0] + str(degats_def) +
+                               phrasesClass["NW"]["defense"]["norm"]["mag"][1], liste_joueur, 3)
+            self.pv -= degats - degats_def
+            self.mana -= 250
+
 
   def boite_info(self) : 
-    retirer = vsmallfont.render(str(self.pv)+" PV", 1, (255, 255, 255)).get_rect()[2]
+    retirer = vsmallfont.render(str(self.pv) + phrasesClass["NW"]["infoBox"]["pv"], 1, (255, 255, 255)).get_rect()[2]
     pos_0 = screen.get_width() + retirer
     pos_1 = screen.get_width() - 20
     pos_2 = screen.get_width()
@@ -933,16 +776,16 @@ class Night_walker :
     pg.draw.rect(screen, (50, 50, 50), [pos_1 - 123, 75, 1, 40])
     screen.blit(vsmallfont.render(self.nom, 1, (255, 255, 255)), [pos_1 - 220, 30, 50, 25])
     if self.pv < self.pvbase/4 : 
-      screen.blit(vsmallfont.render(str(self.pv)+" PV", 1, (255, 255, 255)), [pos_0 - 79 - retirer, 30, retirer, 25])
+      screen.blit(vsmallfont.render(str(self.pv) + phrasesClass["NW"]["infoBox"]["pv"], 1, (255, 255, 255)), [pos_0 - 79 - retirer, 30, retirer, 25])
     else :
-      retirer = vsmallfont.render("?"+" PV", 1, (255, 255, 255)).get_rect()[2]
-      screen.blit(vsmallfont.render("?"+" PV", 1, (255, 255, 255)), [pos_0 - 79 - retirer, 30, retirer, 25])
-    screen.blit(vsmallfont.render("Stats :", 1, (255, 255, 255)), [pos_1 - 220, 55, 50, 25])
-    screen.blit(vsmallfont.render("Force :", 1, (255, 255, 255)), [pos_1 - 220, 75, 50, 25])
-    screen.blit(vsmallfont.render("Défense :", 1, (255, 255, 255)), [pos_1 - 118, 75, 50, 25])
-    screen.blit(vsmallfont.render("Mana :", 1, (255, 255, 255)), [pos_1 - 220, 95, 50, 25])
-    screen.blit(vsmallfont.render("Précision :", 1, (255, 255, 255)), [pos_1 - 118, 95, 50, 25])
-    screen.blit(vsmallfont.render("Ombre :", 1, (255, 255, 255)), [pos_1 - 220, 115, 50, 25])
+      retirer = vsmallfont.render("?" + phrasesClass["NW"]["infoBox"]["pv"], 1, (255, 255, 255)).get_rect()[2]
+      screen.blit(vsmallfont.render("?" + phrasesClass["NW"]["infoBox"]["pv"], 1, (255, 255, 255)), [pos_0 - 79 - retirer, 30, retirer, 25])
+    screen.blit(vsmallfont.render(phrasesClass["NW"]["infoBox"]["stats"], 1, (255, 255, 255)), [pos_1 - 220, 55, 50, 25])
+    screen.blit(vsmallfont.render(phrasesClass["NW"]["infoBox"]["strength"], 1, (255, 255, 255)), [pos_1 - 220, 75, 50, 25])
+    screen.blit(vsmallfont.render(phrasesClass["NW"]["infoBox"]["defense"], 1, (255, 255, 255)), [pos_1 - 118, 75, 50, 25])
+    screen.blit(vsmallfont.render(phrasesClass["NW"]["infoBox"]["mana"], 1, (255, 255, 255)), [pos_1 - 220, 95, 50, 25])
+    screen.blit(vsmallfont.render(phrasesClass["NW"]["infoBox"]["precision"], 1, (255, 255, 255)), [pos_1 - 118, 95, 50, 25])
+    screen.blit(vsmallfont.render(phrasesClass["NW"]["infoBox"]["ombre"], 1, (255, 255, 255)), [pos_1 - 220, 115, 50, 25])
     retirer = vsmallfont.render(str(self.force), 1, (255, 255, 255)).get_rect()[2]
     screen.blit(vsmallfont.render(str(self.force), 1, (255, 255, 255)), [pos_1 - 129 - retirer, 75, retirer, 25])
     screen.blit(vsmallfont.render(str(self.defence), 1, (255, 255, 255)), [pos_2 - 27 - retirer, 75, retirer, 25])
@@ -1325,7 +1168,7 @@ class BarreDeVie :
   
   def AfficheBar(self) : 
     width = screen.get_width()
-    if self.name == "Marcheur de la nuit" and self.pv > self.pvAffiche : 
+    if self.name == phrasesClass["NW"]["Name"] and self.pv > self.pvAffiche :
       completedColour = (100, 100, 100)
     else : 
       completedColour = (200, 0, 0)
@@ -1367,25 +1210,26 @@ def creation_perso(nom, pv, mana, force, defence, precision, id, turn) :
     Joueur = J(nom,pv,mana,precision,force,defence,id,turn)
     return(Joueur)
 
-def banshee_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bouton_3) :
+
+def banshee_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bouton_3):
   banshee = Banshee(liste_joueur)
-  for joueur in liste_joueur : 
+  for joueur in liste_joueur:
     joueur.boite_info()
   banshee.boite_info()
   pg.display.flip()
   game_over = 0
 
-  while game_over == 0 :
+  while game_over == 0:
     joueur_att = banshee.choose_target(liste_joueur)
     degats_infliges = banshee.attack(joueur_att, liste_joueur)
 
-    if not 95 < degats_infliges[1] <= 100 :
+    if not 95 < degats_infliges[1] <= 100:
       banshee.setturn(False)
       joueur_att.setturn(True)
       joueur_att.defences(degats_infliges[0], bouton_quit, bouton_1, bouton_2, bouton_3, banshee, liste_joueur)
       joueur_att.setturn(False)
 
-    for joueur in liste_joueur :
+    for joueur in liste_joueur:
       joueur.setturn(True)
       dgt_joueur = joueur.attack(bouton_quit, bouton_1, bouton_2, bouton_3, banshee, liste_joueur)
       joueur.setturn(False)
@@ -1393,153 +1237,162 @@ def banshee_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bout
       banshee.defences(dgt_joueur, liste_joueur)
       banshee.setturn(False)
 
-      for joueur in liste_joueur :
-        if joueur.getpv() <= 0 :
-          del(liste_joueur[joueur.getid() - 1])
+      for joueur in liste_joueur[:]:  # éviter bug de suppression
+        if joueur.getpv() <= 0:
+          del (liste_joueur[joueur.getid() - 1])
 
       if len(liste_joueur) == 0:
         pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
-        screen.blit(atkfont.render("Les cries de la banshee ont réduit en charpie tous les aventuriers", 1, (255, 255, 255)), [int(screen.get_width()/5), 100])
-        screen.blit(atkfont.render("Fin de la partie", 1, (255, 255, 255)), [int(screen.get_width()/5), 130])
+        screen.blit(atkfont.render(phrasesClass["banshee"]["attack"]["defense"]["fail"][0], 1, (255, 255, 255)),
+                    [int(screen.get_width() / 5), 100])
+        screen.blit(atkfont.render(phrasesClass["banshee"]["attack"]["defense"]["fail"][1], 1, (255, 255, 255)),
+                    [int(screen.get_width() / 5), 130])
         pg.display.flip()
         pg.time.delay(1500)
         game_over = 1
         break
 
-      if banshee.getpv() <= 0 :
+      if banshee.getpv() <= 0:
         pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
-        if len(liste_joueur) < nb_joueur :
-          screen.blit(atkfont.render("Vous avez gagnez au prix de la vie de vos camarades", 1, (255, 255, 255)), [int(screen.get_width()/5), 100])
-          pg.display.flip()
-          pg.time.delay(1500)
-          game_over = 2
-          break
-        else :
-          pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
-          screen.blit(atkfont.render("Félicitations, vous avez vaincu la banshee", 1, (255, 255, 255)), [int(screen.get_width()/5), 100])
-          pg.display.flip()
-          pg.time.delay(1500)
-          game_over = 2
-          break
-
-def NW_fight(liste_joueur,nb_joueur, bouton_quit, bouton_1, bouton_2, bouton_3) :
-  NW = Night_walker(liste_joueur)
-  for joueur in liste_joueur : 
-    joueur.boite_info()
-  NW.boite_info()
-  pg.display.flip()
-  game_over = 0
-
-  while game_over == 0 :
-    joueur_att = NW.choose_target(liste_joueur)
-    degats_infliges = NW.attack(joueur_att,liste_joueur)
-    joueur_att.setturn(True)
-    NW.setturn(False)
-    joueur_att.defences(degats_infliges, bouton_quit, bouton_1, bouton_2, bouton_3, NW, liste_joueur)
-    joueur_att.setturn(False)
-    NW.setturn(True)
-
-    joueur_att = NW.choose_target(liste_joueur)
-    degats_infliges = NW.attack(joueur_att,liste_joueur)
-    joueur_att.setturn(True)
-    NW.setturn(False)
-    joueur_att.defences(degats_infliges, bouton_quit, bouton_1, bouton_2, bouton_3, NW, liste_joueur)
-    joueur_att.setturn(False)
-    
-    NW.setturn(False)
-
-    for joueur in liste_joueur :
-      joueur.setturn(True)
-      dgt_joueur = joueur.attack(bouton_quit, bouton_1, bouton_2, bouton_3, NW, liste_joueur)
-      joueur.setturn(False)
-      NW.setturn(True)
-      NW.defences(dgt_joueur, liste_joueur)
-      NW.setturn(False)
-
-      for joueur in liste_joueur :
-        if joueur.getpv() <= 0 :
-          del(liste_joueur[joueur.getid() - 1])
-
-      if len(liste_joueur) == 0:
-        pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
-        screen.blit(atkfont.render("Les ténèbres ont engloutie tous les joueurs", 1, (255, 255, 255)), [int(screen.get_width()/5), 100])
-        screen.blit(atkfont.render("Fin de la partie", 1, (255, 255, 255)), [int(screen.get_width()/5), 130])
+        if len(liste_joueur) < nb_joueur:
+          screen.blit(atkfont.render(phrasesClass["banshee"]["attack"]["Fight"]["HalfWin"], 1, (255, 255, 255)),
+                      [int(screen.get_width() / 5), 100])
+        else:
+          screen.blit(atkfont.render(phrasesClass["banshee"]["attack"]["Fight"]["Win"], 1, (255, 255, 255)),
+                      [int(screen.get_width() / 5), 100])
         pg.display.flip()
         pg.time.delay(1500)
-        game_over = 1
+        game_over = 2
         break
 
-      if NW.getpv() <= 0 :
-        if len(liste_joueur) < nb_joueur :
+
+def NW_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bouton_3):
+      NW = Night_walker(liste_joueur)
+      for joueur in liste_joueur:
+        joueur.boite_info()
+      NW.boite_info()
+      pg.display.flip()
+      game_over = 0
+
+      while game_over == 0:
+        joueur_att = NW.choose_target(liste_joueur)
+        degats_infliges = NW.attack(joueur_att, liste_joueur)
+        joueur_att.setturn(True)
+        NW.setturn(False)
+        joueur_att.defences(degats_infliges, bouton_quit, bouton_1, bouton_2, bouton_3, NW, liste_joueur)
+        joueur_att.setturn(False)
+        NW.setturn(True)
+
+        joueur_att = NW.choose_target(liste_joueur)
+        degats_infliges = NW.attack(joueur_att, liste_joueur)
+        joueur_att.setturn(True)
+        NW.setturn(False)
+        joueur_att.defences(degats_infliges, bouton_quit, bouton_1, bouton_2, bouton_3, NW, liste_joueur)
+        joueur_att.setturn(False)
+        NW.setturn(False)
+
+        for joueur in liste_joueur:
+          joueur.setturn(True)
+          dgt_joueur = joueur.attack(bouton_quit, bouton_1, bouton_2, bouton_3, NW, liste_joueur)
+          joueur.setturn(False)
+          NW.setturn(True)
+          NW.defences(dgt_joueur, liste_joueur)
+          NW.setturn(False)
+
+        for joueur in liste_joueur[:]:  # éviter bug de suppression en itération
+          if joueur.getpv() <= 0:
+            del liste_joueur[joueur.getid() - 1]
+
+        if len(liste_joueur) == 0:
           pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
-          screen.blit(atkfont.render("Vous avez gagnez au prix de la vie de vos camarades", 1, (255, 255, 255)), [int(screen.get_width()/5), 100])
+          screen.blit(atkfont.render(phrasesClass["NW"]["Fight"]["Lose"][0], 1, (255, 255, 255)),
+                      [int(screen.get_width() / 5), 100])
+          screen.blit(atkfont.render(phrasesClass["NW"]["Fight"]["Lose"][1], 1, (255, 255, 255)),
+                      [int(screen.get_width() / 5), 130])
+          pg.display.flip()
+          pg.time.delay(1500)
+          game_over = 1
+          break
+
+        if NW.getpv() <= 0:
+          pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
+          if len(liste_joueur) < nb_joueur:
+            screen.blit(atkfont.render(phrasesClass["NW"]["Fight"]["HalfWin"], 1, (255, 255, 255)),
+                        [int(screen.get_width() / 5), 100])
+          else:
+            screen.blit(atkfont.render(phrasesClass["NW"]["Fight"]["Win"], 1, (255, 255, 255)),
+                        [int(screen.get_width() / 5), 100])
           pg.display.flip()
           pg.time.delay(1500)
           game_over = 2
           break
-        else :
-          pg.draw.rect(screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()])
-          screen.blit(atkfont.render("Félicitations, vous avez vaincu le marcheur de la nuit", 1, (255, 255, 255)), [int(screen.get_width()/5), 100])
-          pg.display.flip()
-          pg.time.delay(1500)
-          game_over = 2
-          break
 
-def nbperso(perso, selecPerso, bouton_1, bouton_2, bouton_3, bouton_4) :
+def nbperso(perso, selecPerso, bouton_1, bouton_2, bouton_3, bouton_4):
     bouton_1.affiche_bouton(), bouton_2.affiche_bouton(), bouton_3.affiche_bouton(), bouton_4.affiche_bouton()
-    if not selecPerso :
-        if perso == 0 :
-            screen.blit(atkfont.render("Combien de joueurs voulez-vous créer ? (4 max)", True, (255, 255, 255)), (15, 15))
-        else :
-            screen.blit(atkfont.render("Vous avez choisi de jouer à : " + str(perso), True, (255, 255, 255)), (15, 15))
-            selecPerso = True
-            return selecPerso
+    if not selecPerso:
+      if perso == 0:
+        screen.blit(atkfont.render(phrasesClass["Creation"]["NbPerso"][0], True, (255, 255, 255)), (15, 15))
+      else:
+        screen.blit(atkfont.render(phrasesClass["Creation"]["NbPerso"][1] + str(perso), True, (255, 255, 255)),
+                    (15, 15))
+        selecPerso = True
+        return selecPerso
 
-def nom(nom, selecNOM) :
-    if not selecNOM :
-        screen.blit(atkfont.render("Quel est votre nom, aventurier ? " + str(nom), True, (255, 255, 255)), (15, 15))
-    else :
-        screen.blit(atkfont.render("Votre nom est : " + str(nom), True, (255, 255, 255)), (15, 15))
-        selecNOM = True
-        return selecNOM
+def nom(nom, selecNOM):
+    if not selecNOM:
+      screen.blit(atkfont.render(phrasesClass["Creation"]["Name"][0] + str(nom), True, (255, 255, 255)), (15, 15))
+    else:
+      screen.blit(atkfont.render(phrasesClass["Creation"]["Name"][1] + str(nom), True, (255, 255, 255)), (15, 15))
+      selecNOM = True
+      return selecNOM
 
-def nbpv(pv, selecPV, bouton_1, bouton_2, bouton_3, bouton_4) :
+def nbpv(pv, selecPV, bouton_1, bouton_2, bouton_3, bouton_4):
     bouton_1.affiche_bouton(), bouton_2.affiche_bouton(), bouton_3.affiche_bouton(), bouton_4.affiche_bouton()
-    if not selecPV :
-        if pv == 0 :
-            screen.blit(atkfont.render("Combien de points de vie avez vous ? ", True, (255, 255, 255)), (15, 15))
-        else :
-            screen.blit(atkfont.render("Vous avez " + str(pv) + " PV", True, (255, 255, 255)), (15, 15))
-            selecPV = True
-            return selecPV
+    if not selecPV:
+      if pv == 0:
+        screen.blit(atkfont.render(phrasesClass["Creation"]["PV"][0], True, (255, 255, 255)), (15, 15))
+      else:
+        screen.blit(
+          atkfont.render(phrasesClass["Creation"]["PV"][1][0] + str(pv) + phrasesClass["Creation"]["PV"][1][1], True,
+                         (255, 255, 255)), (15, 15))
+        selecPV = True
+        return selecPV
 
-def nbmana(mana, selecMana, bouton_1, bouton_2, bouton_3, bouton_4) :
+def nbmana(mana, selecMana, bouton_1, bouton_2, bouton_3, bouton_4):
     bouton_1.affiche_bouton(), bouton_2.affiche_bouton(), bouton_3.affiche_bouton(), bouton_4.affiche_bouton()
-    if not selecMana :
-        if mana == 0 :
-            screen.blit(atkfont.render("Quelle est la taille de votre réserve de mana ?", True, (255, 255, 255)), (15, 15))
-        else :
-            screen.blit(atkfont.render("Vous avez " + str(mana) + " mana", True, (255, 255, 255)), (15, 15))
-            selecMana = True
-            return selecMana
+    if not selecMana:
+      if mana == 0:
+        screen.blit(atkfont.render(phrasesClass["Creation"]["Mana"][0], True, (255, 255, 255)), (15, 15))
+      else:
+        screen.blit(
+          atkfont.render(phrasesClass["Creation"]["Mana"][1][0] + str(mana) + phrasesClass["Creation"]["Mana"][1][1],
+                         True, (255, 255, 255)), (15, 15))
+        selecMana = True
+        return selecMana
 
-def nbstats(stats, force, Def, prec, selecStats, bouton_1, sliders) :
+def nbstats(stats, force, Def, prec, selecStats, bouton_1, sliders):
     bouton_1.affiche_bouton()
-    if sliders.getTot() > 100 : 
+    if sliders.getTot() > 100:
       bouton_1.setstate("Down")
-    else : 
+    else:
       bouton_1.setstate("")
-    if not selecStats :
-        if stats == 0 :
-            screen.blit(atkfont.render("Quelles sont vos statistiques ? (Force / Défense / Précision)", True, (255, 255, 255)), (15, 15))
-            sliders.afficheSlider()
-        else :
-            screen.blit(atkfont.render("Vous avez " + str(force) + " points de force", True, (255, 255, 255)), (15, 15))
-            screen.blit(atkfont.render("Vous avez " + str(Def) + " points de défense", True, (255, 255, 255)), (15, 45))
-            screen.blit(atkfont.render("Vous avez " + str(prec) + " % de précision", True, (255, 255, 255)), (15, 75))
-            selecStats = True
-            sliders.reset()
-            return selecStats
+    if not selecStats:
+      if stats == 0:
+        screen.blit(atkfont.render(phrasesClass["Creation"]["Stats"]["Question"], True, (255, 255, 255)), (15, 15))
+        sliders.afficheSlider()
+      else:
+        screen.blit(atkfont.render(phrasesClass["Creation"]["Stats"]["Response"]["Str"][0] + str(force) +
+                                   phrasesClass["Creation"]["Stats"]["Response"]["Str"][1], True, (255, 255, 255)),
+                    (15, 15))
+        screen.blit(atkfont.render(phrasesClass["Creation"]["Stats"]["Response"]["Def"][0] + str(Def) +
+                                   phrasesClass["Creation"]["Stats"]["Response"]["Def"][1], True, (255, 255, 255)),
+                    (15, 45))
+        screen.blit(atkfont.render(phrasesClass["Creation"]["Stats"]["Response"]["Prec"][0] + str(prec) +
+                                   phrasesClass["Creation"]["Stats"]["Response"]["Prec"][1], True, (255, 255, 255)),
+                    (15, 75))
+        selecStats = True
+        sliders.reset()
+        return selecStats
 
 def Jouer():
   """
@@ -1941,7 +1794,7 @@ def JouerBoucle() :
           elif bouton_non.getwidth()[0] <= mouse[0] <= bouton_non.getwidth()[1] and bouton_non.getheight()[0] <= mouse[1] <= bouton_non.getheight()[1] :
             running = False
             
-      text = smallfont.render("Voullez-vous lancer une nouvelle partie ?", True, (255, 255, 255))
+      text = smallfont.render(phrasesClass["Boucle"]["Question"], True, (255, 255, 255))
       text_rect = text.get_rect(center = (screen.get_width() / 2, screen.get_height() / 2 - 20))
       screen.blit(text, text_rect)
       bouton_oui.affiche_bouton()

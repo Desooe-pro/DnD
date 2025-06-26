@@ -67,13 +67,13 @@ phrasesClass = {
       },
     "defense": {
       "crit": { 
-        "phy": ["Le marcheur de la nuit parvient à faire la meilleure défence possible et défend ", " de dégâts"], 
-        "reinf": ["Le marcheur de la nuit se défend et utilise de la mana afin de transformer de nombreuses parties de son corps en obscuritée et défend ", " de dégâts"], 
+        "phy": ["Le marcheur de la nuit parvient à faire la meilleure défence possible et défend ", " points de dégâts"],
+        "reinf": ["Le marcheur de la nuit se défend et utilise de la mana afin de transformer de nombreuses parties de son corps en obscuritée et défend ", " points de dégâts"],
         "mag": "Le marcheur de la nuit transorme l'entièreté de son corps en ombre évite tout les dégâts" 
         },
       "norm": { 
         "phy": ["Le marcheur de la nuit parvient à effectuer une très bonne défense et pare ", " dégâts"], 
-        "reinf": ["Le marcheur de la nuit se défend et utilise de la mana afin de transformer certaines parties de son corps en obscuritée et défend ", " de dégâts"], 
+        "reinf": ["Le marcheur de la nuit se défend et utilise de la mana afin de transformer certaines parties de son corps en obscuritée et défend ", " points de dégâts"],
         "mag": ["Le marcheur de la nuit transorme de nombreuses parties de son corps en ombre évite ", " dégâts"] 
         },
       "prepare": "Le marcheur de la nuit prépare sa défense",
@@ -171,5 +171,3 @@ phrasesClass = {
     "Possibility": ["Oui", "Non"]
     }
   }
-
-print(phrasesClass["banshee"])
