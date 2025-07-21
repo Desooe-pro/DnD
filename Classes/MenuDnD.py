@@ -62,37 +62,35 @@ class EscapeMenu:
 
                 if ev.type == pg.MOUSEBUTTONDOWN:
                     mouse = pg.mouse.get_pos()
-                    if (
-                        self.bouton.getwidth()[0]
-                        <= mouse[0]
-                        <= self.bouton.getwidth()[1]
-                        and self.bouton.getheight()[0]
-                        <= mouse[1]
-                        <= self.bouton.getheight()[1]
-                        and not self.bouton.getstate() in ["Down", "Dead"]
-                    ):
+                    if self.bouton.isOn(mouse) and not self.bouton.getstate() in [
+                        "Down",
+                        "Dead",
+                    ]:
                         config.sauvegarder_config(self.config)
-                        return {"end": 1, "config": self.config, "onglet" : self.nav.getNameActive()}
+                        return {
+                            "end": 1,
+                            "config": self.config,
+                            "onglet": self.nav.getNameActive(),
+                        }
                     btns = self.nav.getBoutons()
                     for loop in range(len(btns)):
-                        widthTemp = btns[loop].getWidth()
-                        heightTemp = btns[loop].getHeight()
-                        if (
-                            widthTemp[0] <= mouse[0] <= widthTemp[1]
-                            and heightTemp[0] <= mouse[1] <= heightTemp[1]
-                        ):
+                        if btns[loop].isOn(mouse):
                             self.setActive(btns[loop].getName())
                             ongletActif = self.nav.getNameActive()
                     if ongletActif == "Graphisme":
                         AllCoords = self.nav.getSurfaceLignes("Graphisme")
-                        for i in list(AllCoords.keys()) :
+                        for i in list(AllCoords.keys()):
                             WL, HL, WR, HR = AllCoords[i]
-                            if WL <= mouse[0] <= WR and HL <= mouse[1] <= HR :
+                            if WL <= mouse[0] <= WR and HL <= mouse[1] <= HR:
                                 txt = i.split(" (")
                                 x = txt[0].split(" x ")
                                 self.config["width"] = x[0]
                                 self.config["height"] = x[1]
-                                return {"end": 1, "config": self.config, "onglet": self.nav.getNameActive()}
+                                return {
+                                    "end": 1,
+                                    "config": self.config,
+                                    "onglet": self.nav.getNameActive(),
+                                }
 
                 if ev.type == pg.KEYDOWN:
                     if ev.key == pg.K_ESCAPE:
@@ -113,7 +111,7 @@ class EscapeMenu:
     def getBouton(self):
         return self.bouton
 
-    def setActive(self, name) :
+    def setActive(self, name):
         self.nav.setActive(name)
         self.activeParam = name
 
@@ -200,8 +198,8 @@ class NavMenu:
     def getSurfaceLignes(self, text):
         return self.boutons[text].getSurfaceLignes()
 
-    def setActive(self, name) :
-        for i in list(self.boutons.keys()) :
+    def setActive(self, name):
+        for i in list(self.boutons.keys()):
             self.boutons[i].setActive(False)
         self.boutons[name].setActive(True)
 
@@ -231,9 +229,9 @@ class MenuBouton:
         self.boutonAppliquer = boutonAppliquer
 
     def Afficher(self, name):
-        if self.text == name :
+        if self.text == name:
             self.active = True
-        else :
+        else:
             self.active = False
         mouse = pg.mouse.get_pos()
         center_rect = pg.draw.rect(
@@ -253,10 +251,7 @@ class MenuBouton:
                 (self.widthtop, self.heighttop + self.height - 5, self.width, 5),
             )
             surf_texte = self.font.render(self.text, 1, (240, 240, 240))
-        elif (
-            self.widthtop <= mouse[0] <= self.widthtop + self.width
-            and self.heighttop <= mouse[1] <= self.heighttop + self.height
-        ):
+        elif self.isOn(mouse):
             pg.gfxdraw.box(
                 self.screen,
                 (self.widthtop, self.heighttop, self.width, self.height),
@@ -280,6 +275,12 @@ class MenuBouton:
         self.screen.blit(surf_texte, rect_texte)
         if self.active and self.page != "":
             self.page.Afficher()
+
+    def isOn(self, mousePose):
+        return (
+            self.widthtop <= mousePose[0] <= self.widthtop + self.width
+            and self.heighttop <= mousePose[1] <= self.heighttop + self.height
+        )
 
     def getWidth(self):
         return [int(self.widthtop), int(self.widthtop + self.width)]
@@ -352,7 +353,7 @@ class ParamsGraph:
     def getSurfaceLignes(self):
         res = {}
         for loop in self.lignes:
-            res[loop.getKey()] =  loop.getSurface()
+            res[loop.getKey()] = loop.getSurface()
         return res
 
 
@@ -374,9 +375,16 @@ class LigneGraphisme:
 
     def Afficher(self, active):
         mouse = pg.mouse.get_pos()
-        if self.key in active:
-            colorLigne = (0, 0, 0, 200)
+        if active in self.key:
+            colorLigne = (0, 0, 0, 180)
             colorText = (200, 200, 200)
+            if (
+                self.widthtop <= mouse[0] <= self.widthtop + self.width
+                and self.heighttopligne
+                <= mouse[1]
+                <= self.heighttopligne + self.optHeight
+            ):
+                colorLigne = (0, 0, 0, 220)
         elif (
             self.widthtop <= mouse[0] <= self.widthtop + self.width
             and self.heighttopligne <= mouse[1] <= self.heighttopligne + self.optHeight
@@ -387,7 +395,11 @@ class LigneGraphisme:
             colorLigne = (0, 0, 0, 120)
             colorText = (120, 120, 120)
 
-        center_rect = pg.draw.rect(self.screen, (80, 80, 80), (self.widthtop, self.heighttopligne, self.width, self.optHeight + 1))
+        center_rect = pg.draw.rect(
+            self.screen,
+            (80, 80, 80),
+            (self.widthtop, self.heighttopligne, self.width, self.optHeight + 1),
+        )
         surf_texte = self.font.render(self.key, 1, colorText)
         rect_texte = surf_texte.get_rect()
         rect_texte.center = center_rect.center
@@ -424,7 +436,7 @@ class LigneGraphisme:
         )
         self.screen.blit(surf_texte, rect_texte)
 
-    def getKey(self) :
+    def getKey(self):
         return self.key
 
     def getSurface(self):
