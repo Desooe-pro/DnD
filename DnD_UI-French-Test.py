@@ -1,9 +1,10 @@
-import random, os, sys, pygame_widgets, pygame as pg, config as config
+import random, os, sys, pygame_widgets, pygame as pg, pygame.gfxdraw, config as config
+from math import floor
 
+from pygame import K_RETURN
 from pygame_widgets.slider import Slider
 from pygame_widgets.textbox import TextBox
 from pygame_widgets.progressbar import ProgressBar
-from config import sauvegarder_config
 
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 
@@ -34,16 +35,30 @@ phrasesClass = config.load_phrases(dataConfig["langue"])
 
 class J:
     """
-    Contient :  Outils d'initiation de personnage et godmode
-                Outils de lancement d'attaque avec système de coup critique et raté d'attaque aléatoire
-                Outils de défense avec système de faille défensive avec système de défense critique et raté de déffence aléatoire
-                Outils de boite info
-                Outils info_attaque et info_defence (Donne les informations nécessaires d'attaque et de défense du joueur)
-                Outils getforce, getmana, getpv, getnom, setpv, setpc, setmana et setforce
+    Classe représentant un joueur dans le jeu de rôle.
+
+    Cette classe gère les caractéristiques, les actions et l'interface utilisateur
+    d'un personnage joueur, incluant les attaques, défenses et interactions.
     """
 
-    def __init__(self, nom, pv, mana, precision, force, defence, id, turn):
+    def __init__(self, nom, pv, mana, precision, force, defence, id, posBouton, turn):
+        """
+                Initialise un nouveau joueur.
+
+                Args:
+                    nom (str): Le nom du personnage
+                    pc (int): Points de compétence (Un jour ?)
+                    pv (int): Points de vie
+                    mana (int): Points de mana
+                    force (int): Valeur de force
+                    precision (int): Valeur de précision
+                    defence (int): Valeur de défense
+                    id (int): Identifiant unique du joueur
+                    turn (int): Numéro du tour
+                    posBouton (PosBoutons): Gestionnaire de positions des boutons
+                """
         self.nom = nom
+        self.posBouton = posBouton
 
         if self.nom == "N°0":
             self.nom = "GODMOD"
@@ -70,6 +85,15 @@ class J:
             self.turn = False
 
     def attack(self, bouton_quit, bouton_1, bouton_2, bouton_3, adv, lst_joueur):
+        """
+                Gère l'interface d'attaque du joueur.
+
+                Affiche les options d'attaque disponibles et traite les interactions
+                utilisateur pour sélectionner et exécuter une attaque.
+
+                Returns:
+                    str: Le type d'attaque sélectionné ou None si annulé
+                """
         (
             bouton_1.settexte(phrasesClass["J"]["attack"]["attackType"][0]),
             bouton_2.settexte(phrasesClass["J"]["attack"]["attackType"][1]),
@@ -87,10 +111,10 @@ class J:
             pg.draw.rect(
                 screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()]
             )
-            bouton_quit.setsize((screen.get_width() - 155, screen.get_height() - 55), 2, screen.get_width(), screen.get_height())
-            bouton_1.setsize((screen.get_width() / 16 + 10 * 1, screen.get_height() - 55), 3, screen.get_width(), screen.get_height())
-            bouton_2.setsize((screen.get_width() / 16 * 3 + 10 * 2, screen.get_height() - 55), 3, screen.get_width(), screen.get_height())
-            bouton_3.setsize((screen.get_width() / 16 * 5 + 10 * 3, screen.get_height() - 55), 3, screen.get_width(), screen.get_height())
+            bouton_quit.setsize((6, 10), self.posBouton)
+            bouton_1.setsize((0, 13), self.posBouton)
+            bouton_2.setsize((1, 13), self.posBouton)
+            bouton_3.setsize((2, 13), self.posBouton)
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
                     pg.quit()
@@ -300,6 +324,15 @@ class J:
     def defences(
         self, degats, bouton_quit, bouton_1, bouton_2, bouton_3, adv, lst_joueur
     ):
+        """
+                Gère l'interface de défense du joueur.
+
+                Affiche les options de défense disponibles et traite les interactions
+                utilisateur pour sélectionner une stratégie défensive.
+
+                Returns:
+                    str: Le type de défense sélectionné ou None si annulé
+                """
         (
             bouton_1.settexte(phrasesClass["J"]["defense"]["defenseType"][0]),
             bouton_2.settexte(phrasesClass["J"]["defense"]["defenseType"][1]),
@@ -316,14 +349,10 @@ class J:
             pg.draw.rect(
                 screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()]
             )
-            bouton_quit.setsize((screen.get_width() - 155, screen.get_height() - 55), 2, screen.get_width(),
-                                screen.get_height())
-            bouton_1.setsize((screen.get_width() / 16 + 10 * 1, screen.get_height() - 55), 3, screen.get_width(),
-                             screen.get_height())
-            bouton_2.setsize((screen.get_width() / 16 * 3 + 10 * 2, screen.get_height() - 55), 3, screen.get_width(),
-                             screen.get_height())
-            bouton_3.setsize((screen.get_width() / 16 * 5 + 10 * 3, screen.get_height() - 55), 3, screen.get_width(),
-                             screen.get_height())
+            bouton_quit.setsize((6, 10), self.posBouton)
+            bouton_1.setsize((0, 13), self.posBouton)
+            bouton_2.setsize((1, 13), self.posBouton)
+            bouton_3.setsize((2, 13), self.posBouton)
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
                     pg.quit()
@@ -507,6 +536,15 @@ class J:
             pg.display.flip()
 
     def selec_atta(self, atta_type, selecAtta, bouton_1, bouton_2, bouton_3):
+        """
+                Sélectionne une attaque spécifique par son numéro.
+
+                Args:
+                    num (int): Numéro de l'attaque à sélectionner (1-3)
+
+                Returns:
+                    str: Le type d'attaque correspondant au numéro
+                """
         bouton_1.affiche_bouton(), bouton_2.affiche_bouton(), bouton_3.affiche_bouton()
         if not selecAtta:
             if atta_type == "":
@@ -531,6 +569,15 @@ class J:
         return None
 
     def selec_def(self, def_type, selecDef, bouton_1, bouton_2, bouton_3):
+        """
+                Sélectionne une défense spécifique par son numéro.
+
+                Args:
+                    num (int): Numéro de la défense à sélectionner (1-3)
+
+                Returns:
+                    str: Le type de défense correspondant au numéro
+                """
         bouton_1.affiche_bouton(), bouton_2.affiche_bouton(), bouton_3.affiche_bouton()
         if not selecDef:
             if def_type == "":
@@ -555,6 +602,15 @@ class J:
         return None
 
     def mana_atta(self, mana_uti, selecMD):
+        """
+                Calcule et déduit le coût en mana d'une attaque.
+
+                Args:
+                    type_atta (str): Type d'attaque effectuée
+
+                Returns:
+                    bool: True si le joueur a suffisamment de mana, False sinon
+                """
         if not selecMD:
             screen.blit(
                 atkfont.render(
@@ -707,30 +763,21 @@ class J:
             ],
         )
 
-    def info_attaque(self):
-        msg = smallfont.render(phrasesClass["J"]["info"]["attack"][0], 1, (255, 255, 255))
-        text_rect = msg.get_rect(
-            center=(screen.get_width() / 2, screen.get_height() / 2 - 50)
-        )
-        screen.blit(msg, text_rect)
-
-    def info_defence(self):
-        msg = smallfont.render(phrasesClass["J"]["info"]["defense"][0], 1, (255, 255, 255))
-        text_rect = msg.get_rect(
-            center=(screen.get_width() / 2, screen.get_height() / 2 + 50)
-        )
-        screen.blit(msg, text_rect)
-
     def affiche_texte(self, texte, liste_joueur, temps, adv):
+        """
+                Affiche un texte à l'écran avec une couleur spécifiée.
+
+                Args:
+                    texte (str): Le texte à afficher
+                    color (tuple): Couleur RGB du texte
+        """
         bouton_quit = Bouton(
-            screen.get_width() - 155,
-            screen.get_width() - 15,
-            screen.get_height() - 55,
-            screen.get_height() - 15,
-            phrasesClass["Bouton"]["Quit"],
-            font,
+            (6, 10),
+            2,
+            "Quit",
             (255, 255, 255),
             "",
+            self.posBouton
         )
         duree = temps * 60
         while duree > 0:
@@ -738,7 +785,7 @@ class J:
             pg.draw.rect(
                 screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()]
             )
-            bouton_quit.setsize((width - 155, height - 55), 2, width, height)
+            bouton_quit.setsize((6, 10), self.posBouton)
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
                     pg.quit()
@@ -799,17 +846,27 @@ class J:
 
 class Banshee:
     """
-    Contient :  Outils d'initiation de la banshee
-                Les pv de la banshee évoluent en fonction du nombre de joueurs
-                Outils de choix de la cible (peu dévelopée pour le moment)
-                Outils de lancement d'attaque (peu dévelopée pour le moment)
-                Outils de défense avec système de faille défensive (peu dévelopée pour le moment)
-                Outils de boite info
-                Outils getpv
-    """
+        Classe représentant un ennemi de type Banshee.
 
-    def __init__(self, liste_joueur):
+        Ennemi avec des capacités spéciales et une IA pour combattre
+        automatiquement contre les joueurs.
+    """
+    def __init__(self, liste_joueur, posBouton):
+        """
+                Initialise une nouvelle Banshee.
+
+                Attributs:
+                    nom (str): Nom de la Banshee
+                    pv (int): Points de vie
+                    force (int): Valeur de force
+                    mana (int): Points de mana
+                    defence (int): Valeur de défense
+                    prec (int): Valeur de précision
+                    turn (int): Numéro du tour
+                    posBouton (PosBoutons): Gestionnaire de positions des boutons
+        """
         self.nom = phrasesClass["banshee"]["Name"]
+        self.posBouton = posBouton
 
         if len(liste_joueur) > 1:
             self.pv = self.pvbase = int(
@@ -827,6 +884,15 @@ class Banshee:
         self.BarreDeVie = BarreDeVie(300, self.nom, self.pv, self.pvbase)
 
     def choose_target(self, liste_joueur):
+        """
+                Choisit automatiquement une cible parmi les joueurs.
+
+                Args:
+                    liste_joueur (list): Liste des joueurs disponibles
+
+                Returns:
+                    J: Le joueur ciblé
+        """
         if not liste_joueur:
             print(phrasesClass["banshee"]["attack"]["noTarget"])
             return None
@@ -1019,14 +1085,12 @@ class Banshee:
 
     def affiche_texte(self, texte, liste_joueur, temps):
         bouton_quit = Bouton(
-            screen.get_width() - 155,
-            screen.get_width() - 15,
-            screen.get_height() - 55,
-            screen.get_height() - 15,
-            phrasesClass["Bouton"]["Quit"],
-            font,
+            (6, 10),
+            2,
+            "Quit",
             (255, 255, 255),
             "",
+            self.posBouton
         )
         duree = temps * 60
         while duree > 0:
@@ -1034,7 +1098,7 @@ class Banshee:
             pg.draw.rect(
                 screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()]
             )
-            bouton_quit.setsize((width - 155, height - 55), 2, width, height)
+            bouton_quit.setsize((6, 10), self.posBouton)
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
                     pg.quit()
@@ -1070,8 +1134,9 @@ class Banshee:
 
 
 class Night_walker:
-    def __init__(self, liste_joueur):
+    def __init__(self, liste_joueur, posBouton):
         self.nom = phrasesClass["NW"]["Name"]
+        self.posBouton = posBouton
 
         if len(liste_joueur) > 1:
             self.pv = int(
@@ -1391,14 +1456,12 @@ class Night_walker:
 
     def affiche_texte(self, texte, liste_joueur, temps):
         bouton_quit = Bouton(
-            screen.get_width() - 155,
-            screen.get_width() - 15,
-            screen.get_height() - 55,
-            screen.get_height() - 15,
-            phrasesClass["Bouton"]["Quit"],
-            font,
+            (6, 10),
+            2,
+            "Quit",
             (255, 255, 255),
             "",
+            self.posBouton
         )
         duree = temps * 60
         while duree > 0:
@@ -1406,7 +1469,7 @@ class Night_walker:
             pg.draw.rect(
                 screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()]
             )
-            bouton_quit.setsize((width - 155, height - 55), 2, width, height)
+            bouton_quit.setsize((6, 10), self.posBouton)
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
                     pg.quit()
@@ -1444,43 +1507,179 @@ class Night_walker:
         self.turn = turn
 
 
+class PosBoutons:
+    """
+    Classe responsable du calcul et de la gestion des positions des boutons.
+
+    Cette classe génère automatiquement les positions et tailles des boutons
+    en fonction de la taille de l'écran et du type de bouton demandé.
+
+    Attributes:
+        screen (pygame.Surface): Surface d'affichage pygame
+        width (int): Largeur de l'écran
+        height (int): Hauteur de l'écran
+        btnSizes (dict): Dictionnaire contenant les configurations pour chaque type de bouton
+    """
+
+    def __init__(self, screen):
+        """
+        Initialise la classe PosBoutons.
+
+        Args:
+            screen (pygame.Surface): Surface d'affichage pygame
+        """
+        self.screen = screen
+        self.width = self.screen.get_width()
+        self.height = self.screen.get_height()
+        self.btnSizes = {
+            '1': {'nbCol': 5, 'nbLigne': 9, 'sep': 30},
+            '2': {'nbCol': 7, 'nbLigne': 11, 'sep': 20},
+            '3': {'nbCol': 9, 'nbLigne': 14, 'sep': 10}
+        }
+        self.generateData()
+
+    def generateData(self):
+        """
+        Génère les données de positionnement pour tous les types de boutons.
+        """
+        self.generateDataForPosGen(self.btnSizes['1'])
+        self.generateDataForPosGen(self.btnSizes['2'])
+        self.generateDataForPosGen(self.btnSizes['3'])
+
+    def generateDataForPosGen(self, btnSize):
+        """
+        Génère les données de positionnement pour un type de bouton spécifique.
+
+        Args:
+            btnSize (dict): Configuration du type de bouton à traiter
+
+        Returns:
+            dict: Configuration mise à jour avec les positions calculées
+        """
+        btnSize['btnSizeW'] = int(
+            floor((self.width - 24 - (btnSize['nbCol'] * btnSize['sep'] - btnSize['sep'])) / btnSize['nbCol']) - (
+                    floor((self.width - 24 - (btnSize['nbCol'] * btnSize['sep'] - btnSize['sep'])) / btnSize[
+                        'nbCol']) % 2))
+        btnSize['btnSizeH'] = int(
+            floor(((self.height - 24 - (btnSize['nbLigne'] * btnSize['sep'] - btnSize['sep'])) / btnSize['nbLigne']) - (
+                floor(((self.height - 24 - (btnSize['nbLigne'] * btnSize['sep'] - btnSize['sep'])) / btnSize[
+                    'nbLigne']) % 2))))
+        return self.generatePositions(btnSize)
+
+    def generatePositions(self, btnSize):
+        """
+        Calcule les positions centrales de chaque bouton dans la grille.
+
+        Args:
+            btnSize (dict): Configuration du type de bouton
+
+        Returns:
+            dict: Configuration mise à jour avec les positions des centres des boutons
+        """
+        screenW = btnSize['nbCol'] * btnSize['btnSizeW'] + (btnSize['nbCol'] * btnSize['sep'] - btnSize['sep'])
+        screenH = btnSize['nbLigne'] * btnSize['btnSizeH'] + (btnSize['nbLigne'] * btnSize['sep'] - btnSize['sep'])
+        difW = (self.width - screenW) / 2
+        difH = (self.height - screenH) / 2
+        for loop in range(btnSize['nbLigne']):
+            for i in range(btnSize['nbCol']):
+                rect = pg.Rect(difW + btnSize['btnSizeW'] * i + btnSize['sep'] * i,
+                               difH + btnSize['btnSizeH'] * loop + btnSize['sep'] * loop,
+                               btnSize['btnSizeW'], btnSize['btnSizeH'])
+                btnSize[str(i) + "," + str(loop)] = rect.center
+        return btnSize
+
+    def setScreen(self, screen):
+        """
+        Met à jour l'écran de référence et recalcule toutes les positions.
+
+        Args:
+            screen (pygame.Surface): Nouvelle surface d'affichage
+        """
+        self.screen = screen
+        self.width = self.screen.get_width()
+        self.height = self.screen.get_height()
+        self.btnSizes = {
+            '1': {'nbCol': 5, 'nbLigne': 7, 'sep': 30},
+            '2': {'nbCol': 5, 'nbLigne': 9, 'sep': 20},
+            '3': {'nbCol': 7, 'nbLigne': 12, 'sep': 10}
+        }
+        self.generateData()
+
+    def getDatas(self, type: str, coordinates):
+        """
+        Récupère les données de position et de taille pour un bouton spécifique.
+
+        Args:
+            type (str): Type de bouton ('1', '2', ou '3')
+            coordinates (tuple): Coordonnées (colonne, ligne) du bouton dans la grille
+
+        Returns:
+            tuple: (largeur, hauteur, coordonnées_du_centre)
+        """
+        width = self.btnSizes[type]['btnSizeW']
+        height = self.btnSizes[type]['btnSizeH']
+        coords = self.btnSizes[type][str(coordinates[0]) + ',' + str(coordinates[1])]
+        return width, height, coords
+
+
 class Bouton:
-    def __init__(
-        self, coordinates, type, screenWidth, screenHeight, texte, color, state
-    ):
-        if screenWidth < 1440 and screenHeight < 1024:
-            self.type = type - 1
-        else:
-            self.type = type
-        if type == 1:
-            self.width = int(
-                round(screenWidth * 0.16, 0) - (round(screenWidth * 0.16, 0) % 10)
-            )
-            self.height = int(
-                round(self.width * 0.3, 0) - (round(self.width * 0.3, 0) % 10)
-            )
-        elif type == 2:
-            self.width = int(
-                round(screenWidth * 0.13, 0) - (round(screenWidth * 0.13, 0) % 10)
-            )
-            self.height = int(
-                round(self.width * 0.3, 0) - (round(self.width * 0.3, 0) % 10)
-            )
-        elif type == 3:
-            self.width = int(
-                round(screenWidth * 0.11, 0) - (round(screenWidth * 0.11, 0) % 10)
-            )
-            self.height = int(
-                round(self.width * 0.3, 0) - (round(self.width * 0.3, 0) % 10)
-            )
-        self.widthtop = int(coordinates[0] - self.width / 2)
-        self.heighttop = int(coordinates[1] - self.height / 2)
+    """
+    Classe représentant un bouton interactif avec effets visuels 3D.
+
+    Cette classe gère l'affichage, l'état et les interactions d'un bouton
+    avec des effets visuels de relief et de survol.
+
+    Attributes:
+        type (int): Type de bouton (1, 2, ou 3)
+        posBouton (PosBoutons): Instance de PosBoutons pour les calculs de position
+        width (int): Largeur du bouton
+        height (int): Hauteur du bouton
+        coordinates (tuple): Coordonnées du centre du bouton
+        widthtop (int): Position x du coin supérieur gauche
+        heighttop (int): Position y du coin supérieur gauche
+        texte (str): Texte affiché sur le bouton
+        font (pygame.font.Font): Police utilisée pour le texte
+        color (tuple): Couleur du texte (RGB)
+        state (str): État du bouton ("", "Down", "Dead")
+    """
+
+    def __init__(self, coordinates, type, texte, color, state, posBouton):
+        """
+        Initialise un nouveau bouton.
+
+        Args:
+            coordinates (tuple): Coordonnées (colonne, ligne) dans la grille (type 1 : 0-4 - 0-8, type 2 : 0-6 - 0-10, type 3 : 0-8 - 0-13)
+            type (int): Type de bouton (1, 2, ou 3)
+            texte (str): Texte à afficher sur le bouton
+            color (tuple): Couleur du texte en RGB
+            state (str): État initial du bouton ("", "Down", "Dead")
+            posBouton (PosBoutons): Instance pour les calculs de position
+        """
+        self.type = type
+        self.posBouton = posBouton
+        if self.type == 1:
+            self.width, self.height, self.coordinates = posBouton.getDatas(str(self.type), coordinates)
+        elif self.type == 2:
+            self.width, self.height, self.coordinates = posBouton.getDatas(str(self.type), coordinates)
+        elif self.type == 3:
+            self.width, self.height, self.coordinates = posBouton.getDatas(str(self.type), coordinates)
+        self.widthtop = int(self.coordinates[0] - self.width / 2)
+        self.heighttop = int(self.coordinates[1] - self.height / 2)
         self.texte = texte
         self.font = pg.font.SysFont("Arial", int(self.width * 0.25 - 10))
         self.color = color
         self.state = state
 
     def affiche_bouton(self):
+        """
+        Affiche le bouton avec ses effets visuels 3D selon son état actuel.
+
+        Le bouton change d'apparence selon son état :
+        - Normal : relief classique
+        - Survol : effet d'éclairage inversé
+        - Down : bouton enfoncé
+        - Dead : bouton noir (inactif)
+        """
         center_rect = pg.draw.rect(
             screen,
             (179, 179, 179),
@@ -1490,6 +1689,8 @@ class Bouton:
         rect_texte = surf_texte.get_rect()
         rect_texte.center = center_rect.center
         mouse = pg.mouse.get_pos()
+
+        # Couleurs par défaut (état normal)
         colorMid = (129, 129, 129)
         colorTop = (200, 200, 200)
         colorRight = (90, 90, 90)
@@ -1504,6 +1705,7 @@ class Bouton:
             )
 
         else:
+            # État enfoncé
             if self.state == "Down":
                 colorMid = (69, 69, 69)
                 colorTop = (140, 140, 140)
@@ -1511,9 +1713,11 @@ class Bouton:
                 colorBot = (10, 10, 10)
                 colorLeft = (120, 120, 120)
 
+            # État survol
             elif (
-                self.isOn(mouse)
-                and not self.state == "Down"
+                    self.widthtop <= mouse[0] <= self.widthtop + self.width
+                    and self.heighttop <= mouse[1] <= self.heighttop + self.height
+                    and not self.state == "Down"
             ):
                 colorMid = (120, 120, 120)
                 colorTop = (70, 70, 70)
@@ -1521,6 +1725,7 @@ class Bouton:
                 colorBot = (180, 180, 180)
                 colorLeft = (90, 90, 90)
 
+            # Dessin des bords 3D
             pg.draw.polygon(
                 screen,
                 colorTop,
@@ -1562,6 +1767,7 @@ class Bouton:
                 ],
             )
 
+            # Dessin du centre et du texte
             pg.draw.rect(
                 screen,
                 colorMid,
@@ -1575,50 +1781,89 @@ class Bouton:
             screen.blit(surf_texte, rect_texte)
 
     def isOn(self, mousePose):
+        """
+        Vérifie si la souris est positionnée sur le bouton.
+
+        Args:
+            mousePose (tuple): Position (x, y) de la souris
+
+        Returns:
+            bool: True si la souris est sur le bouton, False sinon
+        """
         return (
-            self.widthtop <= mousePose[0] <= self.widthtop + self.width
-            and self.heighttop <= mousePose[1] <= self.heighttop + self.height
+                self.widthtop <= mousePose[0] <= self.widthtop + self.width
+                and self.heighttop <= mousePose[1] <= self.heighttop + self.height
         )
 
     def getwidth(self):
+        """
+        Récupère les limites horizontales du bouton.
+
+        Returns:
+            list: [position_gauche, position_droite]
+        """
         return [self.widthtop, self.widthtop + self.width]
 
     def getheight(self):
+        """
+        Récupère les limites verticales du bouton.
+
+        Returns:
+            list: [position_haute, position_basse]
+        """
         return [self.heighttop, self.heighttop + self.height]
 
+    def getpose(self):
+        return {'coord': self.coordinates, 'width': self.width, 'height': self.height}
+
     def getstate(self):
+        """
+        Récupère l'état actuel du bouton.
+
+        Returns:
+            str: État du bouton ("", "Down", "Dead")
+        """
         return self.state
 
     def setstate(self, state):
+        """
+        Modifie l'état du bouton.
+
+        Args:
+            state (str): Nouvel état ("", "Down", "Dead")
+        """
         if state in ["", "Down", "Dead"]:
             self.state = state
 
     def settexte(self, texte):
+        """
+        Modifie le texte affiché sur le bouton.
+
+        Args:
+            texte (str): Nouveau texte à afficher
+        """
         if type(texte) == str:
             self.texte = texte
 
-    def setsize(self, coordinates, type, width, height):
-        if width < 1440 and height < 1024 and type > 1:
-            self.type = type - 1
-        else:
+    def setsize(self, coordinates, posBouton, type=None):
+        """
+        Met à jour la taille et la position du bouton.
+
+        Args:
+            coordinates (tuple): Nouvelles coordonnées (colonne, ligne) (type 1 : 0-4 - 0-8, type 2 : 0-6 - 0-10, type 3 : 0-8 - 0-13)
+            type (int, optional): Nouveau type de bouton si différent
+        """
+        if type is not None:
             self.type = type
+        self.posBouton = posBouton
         if self.type == 1:
-            self.width = int(round(width * 0.16, 0) - (round(width * 0.16, 0) % 10))
-            self.height = int(
-                round(self.width * 0.3, 0) - (round(self.width * 0.3, 0) % 10)
-            )
+            self.width, self.height, self.coordinates = self.posBouton.getDatas(str(self.type), coordinates)
         elif self.type == 2:
-            self.width = int(round(width * 0.13, 0) - (round(width * 0.13, 0) % 10))
-            self.height = int(
-                round(self.width * 0.3, 0) - (round(self.width * 0.3, 0) % 10)
-            )
+            self.width, self.height, self.coordinates = self.posBouton.getDatas(str(self.type), coordinates)
         elif self.type == 3:
-            self.width = int(round(width * 0.11, 0) - (round(width * 0.11, 0) % 10))
-            self.height = int(
-                round(self.width * 0.3, 0) - (round(self.width * 0.3, 0) % 10)
-            )
-        self.widthtop = int(coordinates[0] - self.width / 2)
-        self.heighttop = int(coordinates[1] - self.height / 2)
+            self.width, self.height, self.coordinates = self.posBouton.getDatas(str(self.type), coordinates)
+        self.widthtop = int(self.coordinates[0] - self.width / 2)
+        self.heighttop = int(self.coordinates[1] - self.height / 2)
         self.font = pg.font.SysFont("Arial", int(self.width * 0.25 - 10))
 
 
@@ -1670,16 +1915,24 @@ class Texte_Histoire:
 
 
 class Histoire:
-    def __init__(self, texte, font2):
+    def __init__(self, texte, font2, posBouton, screen):
+        self.screen = screen
+        self.posBouton = posBouton
         self.bouton_quit = Bouton(
-            screen.get_width() - 155,
-            screen.get_width() - 15,
-            screen.get_height() - 55,
-            screen.get_height() - 15,
-            phrasesClass["Bouton"]["Quit"],
-            font,
+            (6, 10),
+            2,
+            "Quit",
             (255, 255, 255),
             "",
+            self.posBouton
+        )
+        self.bouton_skip = Bouton(
+            (6, 9),
+            2,
+            "Passer",
+            (255, 255, 255),
+            "",
+            self.posBouton
         )
         self.font = font2
         self.texte = self.creer_lst_texte(texte)
@@ -1692,12 +1945,16 @@ class Histoire:
 
     def affiche_histoire(self):
         game_over = True
+        skip = 0
+        down = False
         while game_over:
             clock.tick(30)
             pg.draw.rect(
                 screen, (0, 0, 0), [0, 0, screen.get_width(), screen.get_height()]
             )
-            self.bouton_quit.setsize((width - 155, height - 55), 2, width, height)
+            self.bouton_quit.setsize((6, 10), self.posBouton)
+            self.bouton_skip.setsize((6, 9), self.posBouton)
+            coordsSkip = self.bouton_skip.getpose()
             for ev in pg.event.get():
                 if ev.type == pg.QUIT:
                     pg.quit()
@@ -1714,14 +1971,54 @@ class Histoire:
                         game_over = False
                         sys.exit()
 
+                    elif (self.bouton_skip.isOn(mouse)
+                        and self.bouton_skip.getstate() not in ["Down", "Dead"]):
+                        game_over = False
+                elif ev.type == pg.KEYDOWN :
+                    if ev.key == pg.K_RETURN:
+                        down = True
+                elif ev.type == pg.KEYUP :
+                    if ev.key == pg.K_RETURN:
+                        down = False
+
+            pg.gfxdraw.arc(self.screen, coordsSkip['coord'][0], coordsSkip['coord'][1] - coordsSkip['height'],
+                           floor((coordsSkip['height'] - 10) / 2), 0, 180, (90, 90, 90))
+            pg.gfxdraw.arc(self.screen, coordsSkip['coord'][0], coordsSkip['coord'][1] - coordsSkip['height'],
+                           floor((coordsSkip['height'] - 10) / 2), 180, 360, (90, 90, 90))
+            if down :
+                if skip >= 45:
+                    game_over = False
+                skip += 1
+            elif skip >= 0:
+                skip -= 1
             for loop in self.texte:
                 loop.afficher()
 
+            if game_over and skip > 0:
+                pg.gfxdraw.arc(self.screen, coordsSkip['coord'][0], coordsSkip['coord'][1] - coordsSkip['height'],
+                               floor((coordsSkip['height'] - 9) / 2), -90, -90 + floor(180 / 45 * skip),
+                               (255, 255, 255))
+                pg.gfxdraw.arc(self.screen, coordsSkip['coord'][0], coordsSkip['coord'][1] - coordsSkip['height'],
+                               floor((coordsSkip['height'] - 10) / 2), -90, -90 + floor(180 / 45 * skip),
+                               (255, 255, 255))
+                pg.gfxdraw.arc(self.screen, coordsSkip['coord'][0], coordsSkip['coord'][1] - coordsSkip['height'],
+                               floor((coordsSkip['height'] - 11) / 2), -90, -90 + floor(180 / 45 * skip),
+                               (255, 255, 255))
+
+                pg.gfxdraw.arc(self.screen, coordsSkip['coord'][0], coordsSkip['coord'][1] - coordsSkip['height'],
+                               floor((coordsSkip['height'] - 9) / 2), 90, 90 + floor(180 / 45 * skip), (255, 255, 255))
+                pg.gfxdraw.arc(self.screen, coordsSkip['coord'][0], coordsSkip['coord'][1] - coordsSkip['height'],
+                               floor((coordsSkip['height'] - 10) / 2), 90, 90 + floor(180 / 45 * skip), (255, 255, 255))
+                pg.gfxdraw.arc(self.screen, coordsSkip['coord'][0], coordsSkip['coord'][1] - coordsSkip['height'],
+                               floor((coordsSkip['height'] - 11) / 2), 90, 90 + floor(180 / 45 * skip), (255, 255, 255))
+
+            self.bouton_skip.affiche_bouton()
             self.bouton_quit.affiche_bouton()
 
             pg.display.flip()
             pg.time.delay(50)
-            game_over = not (self.texte[-1].get_state() == 0)
+            if game_over:
+                game_over = not (self.texte[-1].get_state() == 0)
 
     def state_up(self):
         self.state += 1
@@ -2086,7 +2383,7 @@ class BarreDeVie:
         self.pv = pv
 
 
-def creation_perso(nom, pv, mana, force, defence, precision, id, turn):
+def creation_perso(nom, pv, mana, force, defence, precision, id, posBouton, turn):
     """
     Outils de création de personnage.
     creation_perso est automatiquement lancé avec la fonction Jouer, il n'est pas utile de l'appeler diréctement.
@@ -2094,17 +2391,17 @@ def creation_perso(nom, pv, mana, force, defence, precision, id, turn):
     Sortie : instance de la classe J
     """
     if nom == "N°0":
-        Joueur = J(nom, 0, 0, 0, 0, 0, id, True)
+        Joueur = J(nom, 0, 0, 0, 0, 0, id, posBouton, True)
         return Joueur
 
     if force + precision + defence <= 100 and precision <= 25 and pv + mana <= 3000:
-        Joueur = J(nom, pv, mana, precision, force, defence, id, turn)
+        Joueur = J(nom, pv, mana, precision, force, defence, id, posBouton, turn)
         return Joueur
     return None
 
 
-def banshee_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bouton_3):
-    banshee = Banshee(liste_joueur)
+def banshee_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bouton_3, posBouton):
+    banshee = Banshee(liste_joueur, posBouton)
     for joueur in liste_joueur:
         joueur.boite_info()
     banshee.boite_info()
@@ -2175,7 +2472,7 @@ def banshee_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bout
                 if len(liste_joueur) < nb_joueur:
                     screen.blit(
                         atkfont.render(
-                            phrasesClass["banshee"]["attack"]["Fight"]["HalfWin"],
+                            phrasesClass["banshee"]["Fight"]["HalfWin"],
                             1,
                             (255, 255, 255),
                         ),
@@ -2184,7 +2481,7 @@ def banshee_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bout
                 else:
                     screen.blit(
                         atkfont.render(
-                            phrasesClass["banshee"]["attack"]["Fight"]["Win"],
+                            phrasesClass["banshee"]["Fight"]["Win"],
                             1,
                             (255, 255, 255),
                         ),
@@ -2196,8 +2493,8 @@ def banshee_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bout
                 break
 
 
-def NW_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bouton_3):
-    NW = Night_walker(liste_joueur)
+def NW_fight(liste_joueur, nb_joueur, bouton_quit, bouton_1, bouton_2, bouton_3, posBouton):
+    NW = Night_walker(liste_joueur, posBouton)
     for joueur in liste_joueur:
         joueur.boite_info()
     NW.boite_info()
@@ -2450,6 +2747,19 @@ def nbstats(stats, force, Def, prec, selecStats, bouton_1, sliders):
             return selecStats
     return None
 
+def info_attaque():
+    msg = smallfont.render(phrasesClass["J"]["info"]["attack"][0], 1, (255, 255, 255))
+    text_rect = msg.get_rect(
+        center=(screen.get_width() / 2, screen.get_height() / 2 - 50)
+    )
+    screen.blit(msg, text_rect)
+
+def info_defence():
+    msg = smallfont.render(phrasesClass["J"]["info"]["defense"][0], 1, (255, 255, 255))
+    text_rect = msg.get_rect(
+        center=(screen.get_width() / 2, screen.get_height() / 2 + 50)
+    )
+    screen.blit(msg, text_rect)
 
 def Jouer():
     """
@@ -2474,62 +2784,58 @@ def Jouer():
     prec = 0
     game_over = 0
     loop = 0
-    stop = 0
+    regles = False
     hist = 1
 
+    posBouton = PosBoutons(screen)
+
     bouton_quit = Bouton(
-        (screen.get_width() / 2, screen.get_height() / 4 * 3),
+        (6, 10),
         2,
-        screen.get_width(),
-        screen.get_height(),
         "Quit",
         (255, 255, 255),
         "",
+        posBouton
     )
     bouton_compris = Bouton(
-        (screen.get_width() - 115, screen.get_height() - 120),
-        3,
-        screen.get_width(),
-        screen.get_height(),
+        (6, 9),
+        2,
         phrasesClass["Bouton"]["Rules"],
         (255, 255, 255),
         "",
+        posBouton
     )
     bouton_1 = Bouton(
-        (screen.get_width() / 16, screen.get_height() - 55),
+        (0, 13),
         3,
-        screen.get_width(),
-        screen.get_height(),
         phrasesClass["Bouton"]["BTN1"],
         (255, 255, 255),
         "",
+        posBouton
     )
     bouton_2 = Bouton(
-        (screen.get_width() / 16 * 3, screen.get_height() - 55),
+        (1, 13),
         3,
-        screen.get_width(),
-        screen.get_height(),
         phrasesClass["Bouton"]["BTN2"],
         (255, 255, 255),
         "",
+        posBouton
     )
     bouton_3 = Bouton(
-        (screen.get_width() / 16 * 5, screen.get_height() - 55),
+        (2, 13),
         3,
-        screen.get_width(),
-        screen.get_height(),
         phrasesClass["Bouton"]["BTN3"],
         (255, 255, 255),
         "",
+        posBouton
     )
     bouton_4 = Bouton(
-        (screen.get_width() / 16 * 7, screen.get_height() - 55),
+        (3, 13),
         3,
-        screen.get_width(),
-        screen.get_height(),
         phrasesClass["Bouton"]["BTN4"],
         (255, 255, 255),
         "",
+        posBouton
     )
     sliders = GestionSlider(
         SliderS(100, 200, 600, 20, 90),
@@ -2542,12 +2848,12 @@ def Jouer():
         width = screen.get_width()
         height = screen.get_height()
         pg.draw.rect(screen, (0, 0, 0), [0, 0, width, height])
-        bouton_quit.setsize((width - 155, height - 55), 2, width, height)
-        bouton_compris.setsize((width - 155, height - 120), 2, width, height)
-        bouton_1.setsize((width / 16 + 10 * 1, height - 55), 3, width, height)
-        bouton_2.setsize((width / 16 * 3 + 10 * 2, height - 55), 3, width, height)
-        bouton_3.setsize((width / 16 * 5 + 10 * 3, height - 55), 3, width, height)
-        bouton_4.setsize((width / 16 * 7 + 10 * 4, height - 55), 3, width, height)
+        bouton_quit.setsize((6, 10), posBouton)
+        bouton_compris.setsize((6, 9), posBouton)
+        bouton_1.setsize((0, 13), posBouton)
+        bouton_2.setsize((1, 13), posBouton)
+        bouton_3.setsize((2, 13), posBouton)
+        bouton_4.setsize((3, 13), posBouton)
 
         for ev in pg.event.get():
             if ev.type == pg.QUIT:
@@ -2660,6 +2966,44 @@ def Jouer():
 
         bouton_quit.affiche_bouton()
 
+        while not regles:
+            bouton_quit.setsize((6, 10), posBouton)
+            bouton_compris.setsize((6, 9), posBouton)
+            for ev in pg.event.get():
+                if ev.type == pg.QUIT:
+                    pg.quit()
+                    game_over = 3
+                    sys.exit()
+                if ev.type == pg.MOUSEBUTTONDOWN:
+                    mouse = pg.mouse.get_pos()
+                    if (
+                            bouton_quit.isOn(mouse)
+                            and bouton_quit.getstate()
+                            not in ["Down", "Dead"]
+                    ):
+                        pg.quit()
+                        game_over = 3
+                        sys.exit()
+                    elif (
+                            bouton_compris.isOn(mouse)
+                            and bouton_compris.getstate()
+                            not in ["Down", "Dead"]
+                    ):
+                        regles = True
+                elif ev.type == pg.KEYDOWN:
+                    if ev.key == K_RETURN:
+                        regles = True
+            pg.draw.rect(
+                screen,
+                (0, 0, 0),
+                [0, 0, screen.get_width(), screen.get_height()],
+            )
+            info_attaque()
+            info_defence()
+            bouton_quit.affiche_bouton()
+            bouton_compris.affiche_bouton()
+            pg.display.flip()
+
         if not selecPerso:
             selecPerso = nbperso(
                 perso, selecPerso, bouton_1, bouton_2, bouton_3, bouton_4
@@ -2722,7 +3066,7 @@ def Jouer():
                     pg.display.flip()
 
                 if selecStat and loop == 0:
-                    J1 = creation_perso(name, pv, mana, force, Def, prec, 1, False)
+                    J1 = creation_perso(name, pv, mana, force, Def, prec, 1, posBouton, False)
                     liste_joueur.append(J1)
                     perso -= 1
                     if perso > 0:
@@ -2738,44 +3082,9 @@ def Jouer():
                         selecPV = False
                         selecMana = False
                         selecStat = False
-                    if perso == 0:
-                        while stop == 0:
-                            bouton_quit.setsize((width - 155, height - 55), 2, width, height)
-                            bouton_compris.setsize((width - 155, height - 110), 2, width, height)
-                            for ev in pg.event.get():
-                                if ev.type == pg.QUIT:
-                                    pg.quit()
-                                    game_over = 3
-                                    sys.exit()
-                                if ev.type == pg.MOUSEBUTTONDOWN:
-                                    mouse = pg.mouse.get_pos()
-                                    if (
-                                        bouton_quit.isOn(mouse)
-                                        and bouton_quit.getstate()
-                                        not in ["Down", "Dead"]
-                                    ):
-                                        pg.quit()
-                                        game_over = 3
-                                        sys.exit()
-                                    elif (
-                                        bouton_compris.isOn(mouse)
-                                        and bouton_compris.getstate()
-                                        not in ["Down", "Dead"]
-                                    ):
-                                        stop = 1
-                            pg.draw.rect(
-                                screen,
-                                (0, 0, 0),
-                                [0, 0, screen.get_width(), screen.get_height()],
-                            )
-                            J1.info_attaque()
-                            J1.info_defence()
-                            bouton_quit.affiche_bouton()
-                            bouton_compris.affiche_bouton()
-                            pg.display.flip()
 
                 if selecStat and loop == 1:
-                    J2 = creation_perso(name, pv, mana, force, Def, prec, 2, False)
+                    J2 = creation_perso(name, pv, mana, force, Def, prec, 2, posBouton, False)
                     liste_joueur.append(J2)
                     perso -= 1
                     if perso > 0:
@@ -2791,44 +3100,9 @@ def Jouer():
                         selecPV = False
                         selecMana = False
                         selecStat = False
-                    if perso == 0:
-                        while stop == 0:
-                            bouton_quit.setsize((width - 155, height - 55), 2, width, height)
-                            bouton_compris.setsize((width - 155, height - 110), 2, width, height)
-                            for ev in pg.event.get():
-                                if ev.type == pg.QUIT:
-                                    pg.quit()
-                                    game_over = 3
-                                    sys.exit()
-                                if ev.type == pg.MOUSEBUTTONDOWN:
-                                    mouse = pg.mouse.get_pos()
-                                    if (
-                                        bouton_quit.isOn(mouse)
-                                        and bouton_quit.getstate()
-                                        not in ["Down", "Dead"]
-                                    ):
-                                        pg.quit()
-                                        game_over = 3
-                                        sys.exit()
-                                    elif (
-                                        bouton_compris.isOn(mouse)
-                                        and bouton_compris.getstate()
-                                        not in ["Down", "Dead"]
-                                    ):
-                                        stop = 1
-                            pg.draw.rect(
-                                screen,
-                                (0, 0, 0),
-                                [0, 0, screen.get_width(), screen.get_height()],
-                            )
-                            J1.info_attaque()
-                            J1.info_defence()
-                            bouton_quit.affiche_bouton()
-                            bouton_compris.affiche_bouton()
-                            pg.display.flip()
 
                 if selecStat and loop == 2:
-                    J3 = creation_perso(name, pv, mana, force, Def, prec, 3, False)
+                    J3 = creation_perso(name, pv, mana, force, Def, prec, 3, posBouton, False)
                     liste_joueur.append(J3)
                     perso -= 1
                     if perso > 0:
@@ -2844,44 +3118,9 @@ def Jouer():
                         selecPV = False
                         selecMana = False
                         selecStat = False
-                    if perso == 0:
-                        while stop == 0:
-                            bouton_quit.setsize((width - 155, height - 55), 2, width, height)
-                            bouton_compris.setsize((width - 155, height - 110), 2, width, height)
-                            for ev in pg.event.get():
-                                if ev.type == pg.QUIT:
-                                    pg.quit()
-                                    game_over = 3
-                                    sys.exit()
-                                if ev.type == pg.MOUSEBUTTONDOWN:
-                                    mouse = pg.mouse.get_pos()
-                                    if (
-                                        bouton_quit.isOn(mouse)
-                                        and bouton_quit.getstate()
-                                        not in ["Down", "Dead"]
-                                    ):
-                                        pg.quit()
-                                        game_over = 3
-                                        sys.exit()
-                                    elif (
-                                        bouton_compris.isOn(mouse)
-                                        and bouton_compris.getstate()
-                                        not in ["Down", "Dead"]
-                                    ):
-                                        stop = 1
-                            pg.draw.rect(
-                                screen,
-                                (0, 0, 0),
-                                [0, 0, screen.get_width(), screen.get_height()],
-                            )
-                            J1.info_attaque()
-                            J1.info_defence()
-                            bouton_quit.affiche_bouton()
-                            bouton_compris.affiche_bouton()
-                            pg.display.flip()
 
                 if selecStat and loop == 3:
-                    J4 = creation_perso(name, pv, mana, force, Def, prec, 4, False)
+                    J4 = creation_perso(name, pv, mana, force, Def, prec, 4, posBouton, False)
                     liste_joueur.append(J4)
                     perso -= 1
                     if perso > 0:
@@ -2897,41 +3136,6 @@ def Jouer():
                         selecPV = False
                         selecMana = False
                         selecStat = False
-                    if perso == 0:
-                        while stop == 0:
-                            bouton_quit.setsize((width - 155, height - 55), 2, width, height)
-                            bouton_compris.setsize((width - 155, height - 110), 2, width, height)
-                            for ev in pg.event.get():
-                                if ev.type == pg.QUIT:
-                                    pg.quit()
-                                    game_over = 3
-                                    sys.exit()
-                                if ev.type == pg.MOUSEBUTTONDOWN:
-                                    mouse = pg.mouse.get_pos()
-                                    if (
-                                        bouton_quit.isOn(mouse)
-                                        and bouton_quit.getstate()
-                                        not in ["Down", "Dead"]
-                                    ):
-                                        pg.quit()
-                                        game_over = 3
-                                        sys.exit()
-                                    elif (
-                                        bouton_compris.isOn(mouse)
-                                        and bouton_compris.getstate()
-                                        not in ["Down", "Dead"]
-                                    ):
-                                        stop = 1
-                            pg.draw.rect(
-                                screen,
-                                (0, 0, 0),
-                                [0, 0, screen.get_width(), screen.get_height()],
-                            )
-                            J1.info_attaque()
-                            J1.info_defence()
-                            bouton_quit.affiche_bouton()
-                            bouton_compris.affiche_bouton()
-                            pg.display.flip()
 
             else:
                 del sliders
@@ -2939,8 +3143,8 @@ def Jouer():
 
                 if adversaire_selec == 1:
                     if hist == 1:
-                        NW = Night_walker(liste_joueur)
-                        histo = Histoire(phrasesClass["NW"]["Hist"], atkfont)
+                        NW = Night_walker(liste_joueur, posBouton)
+                        histo = Histoire(phrasesClass["NW"]["Hist"], atkfont, posBouton, screen)
                         histo.affiche_histoire()
                         hist = 0
 
@@ -2956,12 +3160,13 @@ def Jouer():
                         bouton_1,
                         bouton_2,
                         bouton_3,
+                        posBouton
                     )
 
                 if adversaire_selec == 2:
                     if hist == 1:
-                        banshee = Banshee(liste_joueur)
-                        histo = Histoire(phrasesClass["banshee"]["Hist"], atkfont)
+                        banshee = Banshee(liste_joueur, posBouton)
+                        histo = Histoire(phrasesClass["banshee"]["Hist"], atkfont, posBouton, screen)
                         histo.affiche_histoire()
                         hist = 0
                     for joueur in liste_joueur:
@@ -2976,38 +3181,34 @@ def Jouer():
                         bouton_1,
                         bouton_2,
                         bouton_3,
+                        posBouton
                     )
 
 
 def JouerBoucle():
     running = True
+    posBouton = PosBoutons(screen)
     bouton_oui = Bouton(
-        screen.get_width() / 2 - 275,
-        screen.get_width() / 2 - 100,
-        screen.get_height() / 2 + 10,
-        screen.get_height() / 2 + 60,
+        (2, 6),
         "Oui",
-        smallfont,
         (0, 200, 0),
         "",
+        posBouton
     )
     bouton_non = Bouton(
-        screen.get_width() / 2 + 100,
-        screen.get_width() / 2 + 275,
-        screen.get_height() / 2 + 10,
-        screen.get_height() / 2 + 60,
+        (4, 6),
         "Non",
-        smallfont,
         (200, 0, 0),
         "",
+        posBouton
     )
     replay = False
     while running:
         width = screen.get_width()
         height = screen.get_height()
         pg.draw.rect(screen, (0, 0, 0), [0, 0, width, height])
-        bouton_oui.setsize((width / 2 - 275, height / 2 + 10), 2, width, height)
-        bouton_non.setsize((width / 2 + 100, height / 2 + 10), 2, width, height)
+        bouton_oui.setsize((2, 6), posBouton)
+        bouton_non.setsize((4, 6), posBouton)
 
         for ev in pg.event.get():
             if ev.type == pg.QUIT:
@@ -3115,23 +3316,25 @@ def jouer_bloc(bouton_Jouer, bouton_quit):
     bouton_quit.affiche_bouton()
 
 
+# Initialisation des instances principales
+posBouton = PosBoutons(screen)
+
+# Création des boutons principaux
 bouton_Jouer = Bouton(
-    (screen.get_width() / 2, screen.get_height() / 2),
+    (2, 4),
     1,
-    screen.get_width(),
-    screen.get_height(),
     "Jouer",
     (0, 200, 0),
     "",
+    posBouton
 )
 bouton_quit = Bouton(
-    (screen.get_width() / 2, screen.get_height() / 4 * 3),
+    (6, 10),
     2,
-    screen.get_width(),
-    screen.get_height(),
     "Quit",
     (255, 255, 255),
     "",
+    posBouton
 )
 afficheMenu = False
 
@@ -3140,8 +3343,8 @@ while running:
     width = screen.get_width()
     height = screen.get_height()
     pg.draw.rect(screen, (0, 0, 0), [0, 0, width, height])
-    bouton_Jouer.setsize((width / 2, height / 2), 1, width, height)
-    bouton_quit.setsize((width / 2, height / 4 * 3), 2, width, height)
+    bouton_Jouer.setsize((2, 4), posBouton)
+    bouton_quit.setsize((6, 10), posBouton)
     for ev in pg.event.get():
         if ev.type == pg.QUIT:
             pg.quit()
