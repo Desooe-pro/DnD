@@ -2,9 +2,10 @@ import sys, pygame as pg, pygame.gfxdraw, config
 
 
 class EscapeMenu:
-    def __init__(self, widthpos, heightpos, width, height, screen, boutonAppliquer):
+    def __init__(self, widthpos, heightpos, width, height, screen, boutonAppliquer, posBouton):
         self.screen = screen
         self.config = config.charger_config()
+        self.posBouton = posBouton
         self.widthpos = widthpos
         self.heightpos = heightpos
         self.width = width
@@ -30,21 +31,7 @@ class EscapeMenu:
                 (0, 0, self.screen.get_width(), self.screen.get_height()),
             )
             ongletActif = self.nav.getNameActive()
-            self.bouton.setsize(
-                (
-                    self.widthpos
-                    + self.width
-                    - 20
-                    - (self.bouton.getwidth()[1] - self.bouton.getwidth()[0]) / 2,
-                    self.heightpos
-                    + self.height
-                    - 20
-                    - (self.bouton.getheight()[1] - self.bouton.getheight()[0]) / 2,
-                ),
-                2,
-                self.screen.get_width(),
-                self.screen.get_height(),
-            )
+            self.bouton.setsize((6, 10))
             pg.draw.rect(
                 self.screen,
                 (80, 80, 80),
@@ -98,12 +85,13 @@ class EscapeMenu:
             pg.display.update()
         return None
 
-    def setParams(self, widthpos, heightpos, width, height, screen):
+    def setParams(self, widthpos, heightpos, width, height, screen, posBouton):
         self.screen = screen
         self.widthpos = widthpos
         self.heightpos = heightpos
         self.width = width
         self.height = height
+        self.posBouton = posBouton
         self.nav.setParams(
             self.widthpos, self.heightpos, self.width, self.height, self.screen
         )
