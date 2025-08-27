@@ -242,6 +242,7 @@ phrasesClass = {
         "Quit": "Quitter",
         "Rules": "Compris",
         "Validate": "Valider",
+        "Skip": "Passer",
         "BTN1": "1 Joueur",
         "BTN2": "2 Joueurs",
         "BTN3": "3 Joueurs",

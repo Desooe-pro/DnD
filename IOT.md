@@ -16,12 +16,7 @@
     ├─ Niveau papier toilettes
     ├─ Indice de satisfaction
     └─ Fréquences d'utilisation
-      └─ Capteur pour détecter quand la porte est fermée à clé, puis incrémenté et stocké en base de données pour faire des stats
-
----
-
-### 🗑️ [Poubelles](#-sommaire)
-    └─ Niveau de rempissage
+      └─ Détecteur de présence
 
 ---
 
@@ -41,5 +36,5 @@
 ---
 
 ## ❓ [Questions](#-sommaire)
-    ├─ Ont-ils un logiciel pour la gestion des équipes ?
+    ├─ Ont-ils un logiciel pour la gestion des équipes ? Non, mais ils ont une probablement une adresse générique
     └─ Si oui, nouvel onglet avec les informations des capteurs ?

@@ -1,14 +1,15 @@
 import sys, pygame as pg, pygame.gfxdraw, config
+from Classes.Boutons import Bouton, PosBoutons
 from math import floor
 
 
 class EscapeMenu:
     """
     Classe principale du menu d'échappement (menu pause/paramètres).
-    
+
     Cette classe gère l'affichage du menu principal avec ses différents onglets
     (Général, Graphisme, Audio, Contrôles, Quitter) et les interactions utilisateur.
-    
+
     Attributes:
         screen (pygame.Surface): Surface d'affichage pygame
         config (dict): Configuration actuelle du jeu chargée depuis le fichier config
@@ -21,11 +22,11 @@ class EscapeMenu:
         nav (NavMenu): Instance de navigation entre les onglets
         activeParam (str): Nom de l'onglet actuellement actif
     """
-    
-    def __init__(self, widthpos, heightpos, width, height, screen, boutonAppliquer, posBouton):
+
+    def __init__(self, widthpos, heightpos, width, height, screen):
         """
         Initialise le menu d'échappement principal.
-        
+
         Args:
             widthpos (int): Position x du coin supérieur gauche du menu
             heightpos (int): Position y du coin supérieur gauche du menu
@@ -37,17 +38,23 @@ class EscapeMenu:
         """
         self.screen = screen
         self.config = config.charger_config()
-        self.posBouton = posBouton
         self.widthpos = widthpos
         self.heightpos = heightpos
         self.width = width
         self.height = height
-        self.bouton = boutonAppliquer
+        self.widthOnglets = int(floor(width - 40) - (floor(width - 40) % 2))
+        self.heightOnglets = int(floor(height - 40) - (floor(height - 40) % 2))
+        self.posBouton = PosBoutons(
+            self.screen, (self.widthOnglets, self.heightOnglets), "Menu"
+        )
+        self.bouton = Bouton(
+            (4, 8), 2, "Appliquer", (255, 255, 255), "", self.posBouton
+        )
         self.nav = NavMenu(
             self.widthpos,
             self.heightpos,
-            self.width,
-            self.height,
+            self.widthOnglets,
+            self.heightOnglets,
             ["Général", "Graphisme", "Audio", "Contrôles", "Quitter"],
             self.screen,
             self.bouton,
@@ -57,10 +64,10 @@ class EscapeMenu:
     def Afficher(self):
         """
         Affiche le menu et gère la boucle d'événements principale.
-        
+
         Cette méthode gère l'affichage du menu, les clics de souris sur les boutons,
         les changements d'onglets et les modifications de paramètres.
-        
+
         Returns:
             dict: Dictionnaire contenant les informations de sortie :
                 - "end": 1 pour appliquer les changements, 2 pour fermer le menu
@@ -77,8 +84,8 @@ class EscapeMenu:
                 (0, 0, self.screen.get_width(), self.screen.get_height()),
             )
             ongletActif = self.nav.getNameActive()
-            self.bouton.setsize((6, 10), self.posBouton)
-            
+            self.bouton.setsize((4, 8), self.posBouton)
+
             # Fond du menu avec coins arrondis
             pg.draw.rect(
                 self.screen,
@@ -97,26 +104,26 @@ class EscapeMenu:
 
                 if ev.type == pg.MOUSEBUTTONDOWN:
                     mouse = pg.mouse.get_pos()
-                    
+
                     # Clic sur le bouton Appliquer
                     if self.bouton.isOn(mouse) and not self.bouton.getstate() in [
                         "Down",
                         "Dead",
                     ]:
-                        config.sauvegarder_config(self.config)
                         return {
                             "end": 1,
                             "config": self.config,
                             "onglet": self.nav.getNameActive(),
+                            'save': True
                         }
-                    
+
                     # Clic sur les boutons d'onglets
                     btns = self.nav.getBoutons()
                     for loop in range(len(btns)):
                         if btns[loop].isOn(mouse):
                             self.setActive(btns[loop].getName())
                             ongletActif = self.nav.getNameActive()
-                    
+
                     # Gestion spéciale pour l'onglet Graphisme
                     if ongletActif == "Graphisme":
                         AllCoords = self.nav.getSurfaceLignes("Graphisme")
@@ -131,6 +138,7 @@ class EscapeMenu:
                                     "end": 1,
                                     "config": self.config,
                                     "onglet": self.nav.getNameActive(),
+                                    "save": False
                                 }
 
                 if ev.type == pg.KEYDOWN:
@@ -139,10 +147,10 @@ class EscapeMenu:
             pg.display.update()
         return None
 
-    def setParams(self, widthpos, heightpos, width, height, screen, posBouton):
+    def setParams(self, widthpos, heightpos, width, height, screen):
         """
         Met à jour les paramètres de taille et position du menu.
-        
+
         Args:
             widthpos (int): Nouvelle position x
             heightpos (int): Nouvelle position y
@@ -151,20 +159,34 @@ class EscapeMenu:
             screen (pygame.Surface): Nouvelle surface d'affichage
             posBouton (PosBoutons): Instance mise à jour pour les positions
         """
+        oldWidthOnglets = self.widthOnglets
+        oldHeightOnglets = self.heightOnglets
         self.screen = screen
         self.widthpos = widthpos
         self.heightpos = heightpos
         self.width = width
         self.height = height
-        self.posBouton = posBouton
+        self.widthOnglets = int(floor(width - 40) - (floor(width - 40) % 2))
+        self.heightOnglets = int(floor(height - 40) - (floor(height - 40) % 2))
+        if (
+            self.widthOnglets != oldWidthOnglets
+            or self.heightOnglets != oldHeightOnglets
+        ):
+            self.posBouton = PosBoutons(
+                self.screen, (self.widthOnglets, self.heightOnglets), "Menu"
+            )
         self.nav.setParams(
-            self.widthpos, self.heightpos, self.width, self.height, self.screen
+            self.widthpos,
+            self.heightpos,
+            self.widthOnglets,
+            self.heightOnglets,
+            self.screen,
         )
 
     def getBouton(self):
         """
         Récupère le bouton "Appliquer" du menu.
-        
+
         Returns:
             Bouton: Instance du bouton "Appliquer"
         """
@@ -173,7 +195,7 @@ class EscapeMenu:
     def setActive(self, name):
         """
         Active un onglet spécifique du menu.
-        
+
         Args:
             name (str): Nom de l'onglet à activer
         """
@@ -184,10 +206,10 @@ class EscapeMenu:
 class NavMenu:
     """
     Classe gérant la navigation entre les onglets du menu.
-    
+
     Cette classe s'occupe de l'affichage des boutons d'onglets et de la gestion
     du contenu associé à chaque onglet.
-    
+
     Attributes:
         screen (pygame.Surface): Surface d'affichage pygame
         boutonAppliquer (Bouton): Bouton "Appliquer" du menu principal
@@ -200,13 +222,13 @@ class NavMenu:
         btnHeight (int): Hauteur calculée pour chaque bouton d'onglet
         boutons (dict): Dictionnaire des boutons d'onglets créés
     """
-    
+
     def __init__(
         self, widthtop, heighttop, width, height, options, screen, boutonAppliquer
     ):
         """
         Initialise le système de navigation du menu.
-        
+
         Args:
             widthtop (int): Position x de la zone de navigation
             heighttop (int): Position y de la zone de navigation
@@ -220,16 +242,16 @@ class NavMenu:
         self.boutonAppliquer = boutonAppliquer
         self.widthtop = widthtop + 20
         self.heighttop = heighttop + 20
-        self.width = int(round(width - 40, 0) - (round(width - 40, 0) % 2))
-        self.height = int(round(height - 40, 0) - (round(height - 40, 0) % 2))
+        self.width = width
+        self.height = height
         self.optionsNav = options
         self.btnWidth = int(
-            round(self.width / len(self.optionsNav), 0)
-            - (round(self.width / len(self.optionsNav), 0) % 10)
+            floor(self.width / len(self.optionsNav))
+            - (floor(self.width / len(self.optionsNav)) % 10)
         )
         self.btnHeight = int(
-            round(self.screen.get_height() * 0.055, 0)
-            - (round(self.screen.get_height() * 0.055, 0) % 10)
+            floor(self.screen.get_height() * 0.055)
+            - (floor(self.screen.get_height() * 0.055) % 10)
         )
         self.boutons = {}
         self.generateBtn()
@@ -237,7 +259,7 @@ class NavMenu:
     def generateBtn(self):
         """
         Génère tous les boutons d'onglets avec leurs pages associées.
-        
+
         Crée les instances MenuBouton pour chaque onglet et associe les pages
         de paramètres correspondantes (comme ParamsGraph pour l'onglet Graphisme).
         """
@@ -268,7 +290,7 @@ class NavMenu:
     def Afficher(self, name):
         """
         Affiche tous les boutons d'onglets avec l'onglet actif spécifié.
-        
+
         Args:
             name (str): Nom de l'onglet à afficher comme actif
         """
@@ -278,7 +300,7 @@ class NavMenu:
     def getBoutons(self):
         """
         Récupère la liste de tous les boutons d'onglets.
-        
+
         Returns:
             list: Liste des instances MenuBouton
         """
@@ -290,7 +312,7 @@ class NavMenu:
     def getNameActive(self):
         """
         Récupère le nom de l'onglet actuellement actif.
-        
+
         Returns:
             str|None: Nom de l'onglet actif ou None si aucun n'est actif
         """
@@ -302,7 +324,7 @@ class NavMenu:
     def setParams(self, widthtop, heighttop, width, height, screen):
         """
         Met à jour les paramètres de la zone de navigation.
-        
+
         Args:
             widthtop (int): Nouvelle position x
             heighttop (int): Nouvelle position y
@@ -313,25 +335,25 @@ class NavMenu:
         self.screen = screen
         self.widthtop = widthtop + 20
         self.heighttop = heighttop + 20
-        self.width = int(round(width - 40, 0) - (round(width - 40, 0) % 2))
-        self.height = int(round(height - 40, 0) - (round(height - 40, 0) % 2))
+        self.width = width
+        self.height = height
         self.btnWidth = int(
-            round(self.width / len(self.optionsNav), 0)
-            - (round(self.width / len(self.optionsNav), 0) % 10)
+            floor(self.width / len(self.optionsNav))
+            - (floor(self.width / len(self.optionsNav)) % 10)
         )
         self.btnHeight = int(
-            round(self.screen.get_height() * 0.055, 0)
-            - (round(self.screen.get_height() * 0.055, 0) % 10)
+            floor(self.screen.get_height() * 0.055)
+            - (floor(self.screen.get_height() * 0.055) % 10)
         )
         self.generateBtn()
 
     def getSurfaceLignes(self, text):
         """
         Récupère les surfaces cliquables des lignes d'un onglet spécifique.
-        
+
         Args:
             text (str): Nom de l'onglet dont récupérer les surfaces
-            
+
         Returns:
             dict: Dictionnaire des surfaces cliquables pour chaque ligne
         """
@@ -340,7 +362,7 @@ class NavMenu:
     def setActive(self, name):
         """
         Active un onglet spécifique et désactive tous les autres.
-        
+
         Args:
             name (str): Nom de l'onglet à activer
         """
@@ -352,10 +374,10 @@ class NavMenu:
 class MenuBouton:
     """
     Classe représentant un bouton d'onglet dans le menu de navigation.
-    
+
     Chaque bouton correspond à un onglet et peut avoir une page de contenu associée.
     Le bouton change d'apparence selon son état (actif, survol, normal).
-    
+
     Attributes:
         screen (pygame.Surface): Surface d'affichage pygame
         widthtop (int): Position x du bouton
@@ -368,7 +390,7 @@ class MenuBouton:
         page: Instance de la page de contenu associée (peut être "")
         boutonAppliquer (Bouton): Référence au bouton "Appliquer"
     """
-    
+
     def __init__(
         self,
         widthtop,
@@ -383,7 +405,7 @@ class MenuBouton:
     ):
         """
         Initialise un bouton d'onglet du menu.
-        
+
         Args:
             widthtop (int): Position x du coin supérieur gauche
             heighttop (int): Position y du coin supérieur gauche
@@ -409,12 +431,12 @@ class MenuBouton:
     def Afficher(self, name):
         """
         Affiche le bouton d'onglet avec les effets visuels appropriés.
-        
+
         Le bouton change d'apparence selon son état :
         - Actif : fond sombre avec ligne de soulignement claire
         - Survol : fond semi-transparent avec soulignement
         - Normal : fond semi-transparent simple
-        
+
         Args:
             name (str): Nom de l'onglet actuellement sélectionné
         """
@@ -423,14 +445,14 @@ class MenuBouton:
         else:
             self.active = False
         mouse = pg.mouse.get_pos()
-        
+
         # Fond de base du bouton
         center_rect = pg.draw.rect(
             self.screen,
             (180, 180, 180),
             (self.widthtop, self.heighttop, self.width, self.height),
         )
-        
+
         if self.active:
             # Bouton actif : fond sombre avec soulignement
             pg.gfxdraw.box(
@@ -465,12 +487,12 @@ class MenuBouton:
                 (0, 0, 0, 160),
             )
             surf_texte = self.font.render(self.text, 1, (180, 180, 180))
-        
+
         # Centrage et affichage du texte
         rect_texte = surf_texte.get_rect()
         rect_texte.center = center_rect.center
         self.screen.blit(surf_texte, rect_texte)
-        
+
         # Affichage du contenu de la page si le bouton est actif
         if self.active and self.page != "":
             self.page.Afficher()
@@ -478,10 +500,10 @@ class MenuBouton:
     def isOn(self, mousePose):
         """
         Vérifie si la souris est positionnée sur le bouton.
-        
+
         Args:
             mousePose (tuple): Position (x, y) de la souris
-            
+
         Returns:
             bool: True si la souris est sur le bouton, False sinon
         """
@@ -493,7 +515,7 @@ class MenuBouton:
     def getWidth(self):
         """
         Récupère les limites horizontales du bouton.
-        
+
         Returns:
             list: [position_gauche, position_droite]
         """
@@ -502,7 +524,7 @@ class MenuBouton:
     def getHeight(self):
         """
         Récupère les limites verticales du bouton.
-        
+
         Returns:
             list: [position_haute, position_basse]
         """
@@ -511,7 +533,7 @@ class MenuBouton:
     def getActive(self):
         """
         Récupère l'état actif du bouton.
-        
+
         Returns:
             bool: True si le bouton est actif, False sinon
         """
@@ -520,7 +542,7 @@ class MenuBouton:
     def getName(self):
         """
         Récupère le nom/texte du bouton.
-        
+
         Returns:
             str: Texte affiché sur le bouton
         """
@@ -529,7 +551,7 @@ class MenuBouton:
     def getSurfaceLignes(self):
         """
         Récupère les surfaces cliquables de la page associée.
-        
+
         Returns:
             dict: Surfaces cliquables de la page de contenu
         """
@@ -538,7 +560,7 @@ class MenuBouton:
     def setActive(self, active):
         """
         Modifie l'état actif du bouton.
-        
+
         Args:
             active (bool): Nouvel état actif du bouton
         """
@@ -548,10 +570,10 @@ class MenuBouton:
 class ParamsGraph:
     """
     Classe gérant la page de paramètres graphiques.
-    
+
     Cette classe affiche la liste des résolutions disponibles et gère
     la sélection de la résolution d'écran.
-    
+
     Attributes:
         screen (pygame.Surface): Surface d'affichage pygame
         boutonAppliquer (Bouton): Référence au bouton "Appliquer"
@@ -565,11 +587,11 @@ class ParamsGraph:
         optHeight (int): Hauteur des lignes d'options
         lignes (list): Liste des instances LigneGraphisme créées
     """
-    
+
     def __init__(self, screen, widthtop, heighttop, width, height, boutonAppliquer):
         """
         Initialise la page de paramètres graphiques.
-        
+
         Args:
             screen (pygame.Surface): Surface d'affichage pygame
             widthtop (int): Position x de la zone de paramètres
@@ -599,8 +621,8 @@ class ParamsGraph:
         self.active = temp["width"] + " x " + temp["height"]
         self.blocOptHeight = self.height / len(self.options)
         self.optHeight = int(
-            round(self.screen.get_height() * 0.055, 0)
-            + (round(self.screen.get_height() * 0.055, 0) % 2)
+            floor(self.screen.get_height() * 0.055)
+            + (floor(self.screen.get_height() * 0.055) % 2)
         )
         self.lignes = []
         self.generateLines()
@@ -608,7 +630,7 @@ class ParamsGraph:
     def generateLines(self):
         """
         Génère toutes les lignes d'options de résolution.
-        
+
         Crée une instance LigneGraphisme pour chaque résolution disponible
         avec la position et la taille calculées automatiquement.
         """
@@ -630,7 +652,7 @@ class ParamsGraph:
     def Afficher(self):
         """
         Affiche toutes les lignes d'options de résolution.
-        
+
         Chaque ligne est affichée avec l'indication de la résolution active.
         """
         for loop in self.lignes:
@@ -639,7 +661,7 @@ class ParamsGraph:
     def getSurfaceLignes(self):
         """
         Récupère les surfaces cliquables de toutes les lignes d'options.
-        
+
         Returns:
             dict: Dictionnaire associant chaque nom de résolution à sa surface cliquable
         """
@@ -652,10 +674,10 @@ class ParamsGraph:
 class LigneGraphisme:
     """
     Classe représentant une ligne d'option de résolution graphique.
-    
+
     Chaque ligne affiche une résolution disponible avec des effets visuels
     selon son état (sélectionnée, survolée, normale).
-    
+
     Attributes:
         screen (pygame.Surface): Surface d'affichage pygame
         key (str): Nom de la résolution (ex: "1920 x 1080 (1080p)")
@@ -667,13 +689,13 @@ class LigneGraphisme:
         font (pygame.font.Font): Police utilisée pour le texte
         heighttopligne (int): Position y calculée de la ligne centrée
     """
-    
+
     def __init__(
         self, key, widthtop, heighttop, width, blocOptHeight, optHeight, screen
     ):
         """
         Initialise une ligne d'option de résolution graphique.
-        
+
         Args:
             key (str): Nom de la résolution à afficher
             widthtop (int): Position x de la ligne
@@ -698,17 +720,17 @@ class LigneGraphisme:
     def Afficher(self, active):
         """
         Affiche la ligne d'option avec les effets visuels appropriés.
-        
+
         La ligne change d'apparence selon son état :
         - Active : couleurs plus vives, effet de sélection
         - Survol : couleurs intermédiaires
         - Normale : couleurs atténuées
-        
+
         Args:
             active (str): Nom de la résolution actuellement active
         """
         mouse = pg.mouse.get_pos()
-        
+
         # Détermination des couleurs selon l'état
         if active in self.key:
             colorLigne = (0, 0, 0, 180)
@@ -736,12 +758,12 @@ class LigneGraphisme:
             (80, 80, 80),
             (self.widthtop, self.heighttopligne, self.width, self.optHeight + 1),
         )
-        
+
         # Texte centré
         surf_texte = self.font.render(self.key, 1, colorText)
         rect_texte = surf_texte.get_rect()
         rect_texte.center = center_rect.center
-        
+
         # Effets de bords arrondis avec des arcs
         radius = temp = int(self.optHeight / 2)
         while radius > 0:
@@ -766,7 +788,7 @@ class LigneGraphisme:
                 colorLigne,
             )
             radius -= 1
-        
+
         # Fond central avec transparence
         pg.gfxdraw.box(
             self.screen,
@@ -783,7 +805,7 @@ class LigneGraphisme:
     def getKey(self):
         """
         Récupère le nom de la résolution de cette ligne.
-        
+
         Returns:
             str: Nom de la résolution (ex: "1920 x 1080 (1080p)")
         """
@@ -792,7 +814,7 @@ class LigneGraphisme:
     def getSurface(self):
         """
         Récupère les coordonnées de la surface cliquable de cette ligne.
-        
+
         Returns:
             list: [x_gauche, y_haut, x_droite, y_bas] de la zone cliquable
         """

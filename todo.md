@@ -1,6 +1,7 @@
 En cours
 ===
-Menu *(Voir retours)*
+Menu *(Voir retours)* <br>
+Ajouter un GameState pour avoir moins de varaibles globales
 
 ---
 A faire
