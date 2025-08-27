@@ -636,69 +636,102 @@ class J:
             return selecMD
 
     def boite_info(self):
+        """
+        Affiche la boîte d'informations du joueur sur le côté gauche de l'écran.
+
+        Cette méthode dessine une interface graphique complète montrant :
+        - Le nom du personnage
+        - Les points de vie actuels
+        - Toutes les statistiques (Force, Défense, Mana, Précision)
+        - Un indicateur visuel si c'est le tour du joueur (bordure verte)
+
+        La boîte est positionnée verticalement en fonction de l'ID du joueur
+        pour permettre l'affichage de plusieurs joueurs simultanément.
+
+        Note:
+            Utilise les variables globales screen, vsmallfont et phrasesClass.
+            La position est calculée dynamiquement selon self.id.
+        """
+        # Dessiner la bordure verte si c'est le tour du joueur
         if self.turn:
             pg.draw.rect(
                 screen,
-                (0, 255, 0),
+                (0, 255, 0),  # Vert pour indiquer le tour actif
                 [13, 13 + (120 * (self.id - 1) + 20 * (self.id - 1)), 229, 119],
             )
+
+        # Dessiner les couches de fond de la boîte (effet de profondeur)
         pg.draw.rect(
             screen,
-            (255, 255, 255),
+            (255, 255, 255),  # Couche blanche externe
             [15, 15 + (120 * (self.id - 1) + 20 * (self.id - 1)), 225, 115],
         )
         pg.draw.rect(
             screen,
-            (200, 200, 200),
+            (200, 200, 200),  # Couche grise claire
             [18, 18 + (120 * (self.id - 1) + 20 * (self.id - 1)), 219, 109],
         )
         pg.draw.rect(
             screen,
-            (170, 170, 170),
+            (170, 170, 170),  # Couche grise moyenne
             [18, 21 + (120 * (self.id - 1) + 20 * (self.id - 1)), 216, 106],
         )
         pg.draw.rect(
             screen,
-            (130, 130, 130),
+            (130, 130, 130),  # Couche grise foncée (fond principal)
             [21, 21 + (120 * (self.id - 1) + 20 * (self.id - 1)), 213, 103],
         )
+
+        # Dessiner les lignes de séparation
         pg.draw.rect(
             screen,
-            (50, 50, 50),
+            (50, 50, 50),  # Ligne horizontale de séparation
             [40, 52 + (120 * (self.id - 1) + 20 * (self.id - 1)), 160, 1],
         )
         pg.draw.rect(
             screen,
-            (50, 50, 50),
+            (50, 50, 50),  # Ligne verticale de séparation pour les stats
             [122, 75 + (120 * (self.id - 1) + 20 * (self.id - 1)), 1, 40],
         )
+
+        # Calculer la largeur du texte des PV pour l'alignement à droite
         retirer = vsmallfont.render(
             str(self.pv) + phrasesClass["J"]["infoBox"]["pv"], 1, (255, 255, 255)
         ).get_rect()[2]
-        pos_0 = 165 + retirer
-        pos_1 = 116
-        pos_2 = 218
+
+        # Définir les positions pour l'alignement du texte
+        pos_0 = 165 + retirer  # Position pour les PV (alignement à droite)
+        pos_1 = 116  # Position pour les stats de gauche
+        pos_2 = 218  # Position pour les stats de droite
+
+        # Afficher le nom du personnage (coin supérieur gauche)
         screen.blit(
             vsmallfont.render(self.nom, 1, (255, 255, 255)),
             [25, 30 + (120 * (self.id - 1) + 20 * (self.id - 1)), 50, 25],
         )
+
+        # Afficher les points de vie (coin supérieur droit, aligné à droite)
         screen.blit(
             vsmallfont.render(
                 str(self.pv) + phrasesClass["J"]["infoBox"]["pv"], 1, (255, 255, 255)
             ),
             [
-                pos_0 - retirer,
+                pos_0 - retirer,  # Alignement à droite
                 30 + (120 * (self.id - 1) + 20 * (self.id - 1)),
                 retirer,
                 25,
             ],
         )
+
+        # Afficher le titre "Stats"
         screen.blit(
             vsmallfont.render(
                 phrasesClass["J"]["infoBox"]["stats"], 1, (255, 255, 255)
             ),
             [25, 55 + (120 * (self.id - 1) + 20 * (self.id - 1)), 50, 25],
         )
+
+        # Afficher les labels des statistiques (colonne de gauche)
         screen.blit(
             vsmallfont.render(
                 phrasesClass["J"]["infoBox"]["strength"], 1, (255, 255, 255)
@@ -707,13 +740,17 @@ class J:
         )
         screen.blit(
             vsmallfont.render(
+                phrasesClass["J"]["infoBox"]["mana"], 1, (255, 255, 255)
+            ),
+            [25, 95 + (120 * (self.id - 1) + 20 * (self.id - 1)), 50, 25],
+        )
+
+        # Afficher les labels des statistiques (colonne de droite)
+        screen.blit(
+            vsmallfont.render(
                 phrasesClass["J"]["infoBox"]["defense"], 1, (255, 255, 255)
             ),
             [127, 75 + (120 * (self.id - 1) + 20 * (self.id - 1)), 50, 25],
-        )
-        screen.blit(
-            vsmallfont.render(phrasesClass["J"]["infoBox"]["mana"], 1, (255, 255, 255)),
-            [25, 95 + (120 * (self.id - 1) + 20 * (self.id - 1)), 50, 25],
         )
         screen.blit(
             vsmallfont.render(
@@ -721,47 +758,57 @@ class J:
             ),
             [127, 95 + (120 * (self.id - 1) + 20 * (self.id - 1)), 50, 25],
         )
+
+        # Afficher les valeurs des statistiques (alignées à droite dans leurs colonnes)
+        # Force (colonne de gauche)
         retirer = vsmallfont.render(str(self.force), 1, (255, 255, 255)).get_rect()[2]
         screen.blit(
             vsmallfont.render(str(self.force), 1, (255, 255, 255)),
             [
-                pos_1 - retirer,
+                pos_1 - retirer,  # Alignement à droite dans la colonne gauche
                 75 + (120 * (self.id - 1) + 20 * (self.id - 1)),
                 retirer,
                 25,
             ],
         )
+
+        # Défense (colonne de droite)
         screen.blit(
             vsmallfont.render(str(self.defence), 1, (255, 255, 255)),
             [
-                pos_2 - retirer + 10,
+                pos_2 - retirer + 10,  # Alignement à droite dans la colonne droite
                 75 + (120 * (self.id - 1) + 20 * (self.id - 1)),
                 retirer,
                 25,
             ],
         )
+
+        # Mana (colonne de gauche)
         retirer = vsmallfont.render(str(self.mana), 1, (255, 255, 255)).get_rect()[2]
         screen.blit(
             vsmallfont.render(str(self.mana), 1, (255, 255, 255)),
             [
-                pos_1 - retirer,
+                pos_1 - retirer,  # Alignement à droite dans la colonne gauche
                 95 + (120 * (self.id - 1) + 20 * (self.id - 1)),
                 retirer,
                 25,
             ],
         )
+
+        # Précision (colonne de droite, avec symbole %)
         retirer = vsmallfont.render(
             str(self.prec) + "%", 1, (255, 255, 255)
         ).get_rect()[2]
         screen.blit(
             vsmallfont.render(str(self.prec) + "%", 1, (255, 255, 255)),
             [
-                pos_2 - retirer + 10,
+                pos_2 - retirer + 10,  # Alignement à droite dans la colonne droite
                 95 + (120 * (self.id - 1) + 20 * (self.id - 1)),
                 retirer,
                 25,
             ],
         )
+
 
     def affiche_texte(self, texte, liste_joueur, temps, adv):
         """
@@ -1004,23 +1051,53 @@ class Banshee:
         pg.time.delay(3000)
 
     def boite_info(self):
+        """
+        Affiche la boîte d'informations de la Banshee sur le côté droit de l'écran.
+
+        Cette méthode dessine une interface graphique complète montrant :
+        - Le nom de la Banshee
+        - Les points de vie actuels
+        - Toutes les statistiques (Force, Défense, Mana, Précision)
+        - Un indicateur visuel si c'est le tour de la Banshee (bordure verte)
+        - Une barre de vie graphique via self.BarreDeVie
+
+        La boîte est positionnée à droite de l'écran avec un alignement
+        calculé dynamiquement selon la largeur de l'écran.
+
+        Note:
+            Utilise les variables globales screen, vsmallfont et phrasesClass.
+            Met à jour et affiche la barre de vie à la fin.
+        """
+        # Calculer la largeur du texte des PV pour l'alignement
         retirer = vsmallfont.render(
             str(self.pv) + phrasesClass["banshee"]["infoBox"]["pv"], 1, (255, 255, 255)
         ).get_rect()[2]
-        pos_0 = screen.get_width() + retirer
-        pos_1 = screen.get_width() - 20
-        pos_2 = screen.get_width()
+
+        # Définir les positions relatives à la largeur d'écran (côté droit)
+        pos_0 = screen.get_width() + retirer  # Position de référence pour PV
+        pos_1 = screen.get_width() - 20  # Position de base côté droit
+        pos_2 = screen.get_width()  # Bord droit de l'écran
+
+        # Dessiner la bordure verte si c'est le tour de la Banshee
         if self.turn:
             pg.draw.rect(screen, (0, 255, 0), [pos_1 - 13 - 219, 13, 239, 129])
+
+        # Dessiner les couches de fond de la boîte (effet de profondeur)
         pg.draw.rect(screen, (255, 255, 255), [pos_1 - 15 - 215, 15, 235, 125])
         pg.draw.rect(screen, (200, 200, 200), [pos_1 - 18 - 209, 18, 229, 119])
         pg.draw.rect(screen, (170, 170, 170), [pos_1 - 18 - 206, 21, 226, 116])
         pg.draw.rect(screen, (130, 130, 130), [pos_1 - 21 - 203, 21, 223, 113])
-        pg.draw.rect(screen, (50, 50, 50), [pos_1 - 210, 52, 200, 1])
-        pg.draw.rect(screen, (50, 50, 50), [pos_1 - 123, 75, 1, 40])
+
+        # Dessiner les lignes de séparation
+        pg.draw.rect(screen, (50, 50, 50), [pos_1 - 210, 52, 200, 1])  # Horizontale
+        pg.draw.rect(screen, (50, 50, 50), [pos_1 - 123, 75, 1, 40])  # Verticale
+
+        # Afficher le nom de la Banshee (coin supérieur gauche de la boîte)
         screen.blit(
             vsmallfont.render(self.nom, 1, (255, 255, 255)), [pos_1 - 220, 30, 50, 25]
         )
+
+        # Afficher les points de vie (coin supérieur droit, aligné à droite)
         screen.blit(
             vsmallfont.render(
                 str(self.pv) + phrasesClass["banshee"]["infoBox"]["pv"],
@@ -1029,50 +1106,62 @@ class Banshee:
             ),
             [pos_0 - 79 - retirer, 30, retirer, 25],
         )
+
+        # Afficher le titre "Stats"
         screen.blit(
             vsmallfont.render(
                 phrasesClass["banshee"]["infoBox"]["stats"], 1, (255, 255, 255)
             ),
             [pos_1 - 220, 55, 50, 25],
         )
+
+        # Afficher les labels des statistiques (disposition en deux colonnes)
         screen.blit(
             vsmallfont.render(
                 phrasesClass["banshee"]["infoBox"]["strength"], 1, (255, 255, 255)
             ),
-            [pos_1 - 220, 75, 50, 25],
+            [pos_1 - 220, 75, 50, 25],  # Colonne gauche
         )
         screen.blit(
             vsmallfont.render(
                 phrasesClass["banshee"]["infoBox"]["defense"], 1, (255, 255, 255)
             ),
-            [pos_1 - 118, 75, 50, 25],
+            [pos_1 - 118, 75, 50, 25],  # Colonne droite
         )
         screen.blit(
             vsmallfont.render(
                 phrasesClass["banshee"]["infoBox"]["mana"], 1, (255, 255, 255)
             ),
-            [pos_1 - 220, 95, 50, 25],
+            [pos_1 - 220, 95, 50, 25],  # Colonne gauche
         )
         screen.blit(
             vsmallfont.render(
                 phrasesClass["banshee"]["infoBox"]["precision"], 1, (255, 255, 255)
             ),
-            [pos_1 - 118, 95, 50, 25],
+            [pos_1 - 118, 95, 50, 25],  # Colonne droite
         )
+
+        # Afficher les valeurs des statistiques (alignées à droite dans leurs colonnes)
+        # Force
         retirer = vsmallfont.render(str(self.force), 1, (255, 255, 255)).get_rect()[2]
         screen.blit(
             vsmallfont.render(str(self.force), 1, (255, 255, 255)),
             [pos_1 - 129 - retirer, 75, retirer, 25],
         )
+        # Défense
         screen.blit(
             vsmallfont.render(str(self.defence), 1, (255, 255, 255)),
             [pos_2 - 27 - retirer, 75, retirer, 25],
         )
+
+        # Mana
         retirer = vsmallfont.render(str(self.mana), 1, (255, 255, 255)).get_rect()[2]
         screen.blit(
             vsmallfont.render(str(self.mana), 1, (255, 255, 255)),
             [pos_1 - 129 - retirer, 95, retirer, 25],
         )
+
+        # Précision (avec symbole %)
         retirer = vsmallfont.render(
             str(self.prec) + "%", 1, (255, 255, 255)
         ).get_rect()[2]
@@ -1080,8 +1169,11 @@ class Banshee:
             vsmallfont.render(str(self.prec) + "%", 1, (255, 255, 255)),
             [pos_2 - 27 - retirer, 95, retirer, 25],
         )
+
+        # Mettre à jour et afficher la barre de vie
         self.BarreDeVie.setPv(self.pv)
         self.BarreDeVie.Affiche()
+
 
     def affiche_texte(self, texte, liste_joueur, temps):
         bouton_quit = Bouton(
@@ -1353,24 +1445,55 @@ class Night_walker:
                 self.mana -= 250
 
     def boite_info(self):
+        """
+        Affiche la boîte d'informations du Night Walker sur le côté droit de l'écran.
+
+        Cette méthode dessine une interface graphique complète avec une particularité :
+        - Masque les PV réels par "?" si les PV sont supérieurs à 25% du maximum
+        - Affiche une statistique supplémentaire "ombre" unique au Night Walker
+        - Montre toutes les autres statistiques standard
+        - Inclut un indicateur visuel pour le tour actif
+        - Affiche une barre de vie graphique
+
+        La logique de masquage des PV ajoute un élément stratégique au combat,
+        ne révélant les PV exacts que lorsque le Night Walker est affaibli.
+
+        Note:
+            Utilise les variables globales screen, vsmallfont et phrasesClass.
+            Comportement spécial pour l'affichage des PV selon self.pv / self.pvbase.
+        """
+        # Calculer la largeur du texte des PV pour l'alignement
         retirer = vsmallfont.render(
             str(self.pv) + phrasesClass["NW"]["infoBox"]["pv"], 1, (255, 255, 255)
         ).get_rect()[2]
-        pos_0 = screen.get_width() + retirer
-        pos_1 = screen.get_width() - 20
-        pos_2 = screen.get_width()
+
+        # Définir les positions relatives à la largeur d'écran (côté droit)
+        pos_0 = screen.get_width() + retirer  # Position de référence pour PV
+        pos_1 = screen.get_width() - 20  # Position de base côté droit
+        pos_2 = screen.get_width()  # Bord droit de l'écran
+
+        # Dessiner la bordure verte si c'est le tour du Night Walker
         if self.turn:
             pg.draw.rect(screen, (0, 255, 0), [pos_1 - 13 - 219, 13, 239, 129])
+
+        # Dessiner les couches de fond de la boîte (effet de profondeur)
         pg.draw.rect(screen, (255, 255, 255), [pos_1 - 15 - 215, 15, 235, 125])
         pg.draw.rect(screen, (200, 200, 200), [pos_1 - 18 - 209, 18, 229, 119])
         pg.draw.rect(screen, (170, 170, 170), [pos_1 - 18 - 206, 21, 226, 116])
         pg.draw.rect(screen, (130, 130, 130), [pos_1 - 21 - 203, 21, 223, 113])
-        pg.draw.rect(screen, (50, 50, 50), [pos_1 - 210, 52, 200, 1])
-        pg.draw.rect(screen, (50, 50, 50), [pos_1 - 123, 75, 1, 40])
+
+        # Dessiner les lignes de séparation
+        pg.draw.rect(screen, (50, 50, 50), [pos_1 - 210, 52, 200, 1])  # Horizontale
+        pg.draw.rect(screen, (50, 50, 50), [pos_1 - 123, 75, 1, 40])  # Verticale
+
+        # Afficher le nom du Night Walker
         screen.blit(
             vsmallfont.render(self.nom, 1, (255, 255, 255)), [pos_1 - 220, 30, 50, 25]
         )
-        if self.pv < self.pvbase / 4:
+
+        # Logique spéciale d'affichage des PV (masquage stratégique)
+        if self.pv < self.pvbase / 4:  # Si PV < 25% du maximum
+            # Afficher les PV réels (Night Walker affaibli)
             screen.blit(
                 vsmallfont.render(
                     str(self.pv) + phrasesClass["NW"]["infoBox"]["pv"],
@@ -1380,6 +1503,7 @@ class Night_walker:
                 [pos_0 - 79 - retirer, 30, retirer, 25],
             )
         else:
+            # Masquer les PV réels avec "?" (Night Walker en bonne santé)
             retirer = vsmallfont.render(
                 "?" + phrasesClass["NW"]["infoBox"]["pv"], 1, (255, 255, 255)
             ).get_rect()[2]
@@ -1389,56 +1513,70 @@ class Night_walker:
                 ),
                 [pos_0 - 79 - retirer, 30, retirer, 25],
             )
+
+        # Afficher le titre "Stats"
         screen.blit(
             vsmallfont.render(
                 phrasesClass["NW"]["infoBox"]["stats"], 1, (255, 255, 255)
             ),
             [pos_1 - 220, 55, 50, 25],
         )
+
+        # Afficher les labels des statistiques standard (disposition en deux colonnes)
         screen.blit(
             vsmallfont.render(
                 phrasesClass["NW"]["infoBox"]["strength"], 1, (255, 255, 255)
             ),
-            [pos_1 - 220, 75, 50, 25],
+            [pos_1 - 220, 75, 50, 25],  # Force - colonne gauche
         )
         screen.blit(
             vsmallfont.render(
                 phrasesClass["NW"]["infoBox"]["defense"], 1, (255, 255, 255)
             ),
-            [pos_1 - 118, 75, 50, 25],
+            [pos_1 - 118, 75, 50, 25],  # Défense - colonne droite
         )
         screen.blit(
             vsmallfont.render(
                 phrasesClass["NW"]["infoBox"]["mana"], 1, (255, 255, 255)
             ),
-            [pos_1 - 220, 95, 50, 25],
+            [pos_1 - 220, 95, 50, 25],  # Mana - colonne gauche
         )
         screen.blit(
             vsmallfont.render(
                 phrasesClass["NW"]["infoBox"]["precision"], 1, (255, 255, 255)
             ),
-            [pos_1 - 118, 95, 50, 25],
+            [pos_1 - 118, 95, 50, 25],  # Précision - colonne droite
         )
+
+        # Afficher le label "ombre" (statistique spéciale du Night Walker)
         screen.blit(
             vsmallfont.render(
                 phrasesClass["NW"]["infoBox"]["ombre"], 1, (255, 255, 255)
             ),
-            [pos_1 - 220, 115, 50, 25],
+            [pos_1 - 220, 115, 50, 25],  # Ombre - ligne supplémentaire
         )
+
+        # Afficher les valeurs des statistiques (alignées à droite dans leurs colonnes)
+        # Force
         retirer = vsmallfont.render(str(self.force), 1, (255, 255, 255)).get_rect()[2]
         screen.blit(
             vsmallfont.render(str(self.force), 1, (255, 255, 255)),
             [pos_1 - 129 - retirer, 75, retirer, 25],
         )
+        # Défense
         screen.blit(
             vsmallfont.render(str(self.defence), 1, (255, 255, 255)),
             [pos_2 - 27 - retirer, 75, retirer, 25],
         )
+
+        # Mana
         retirer = vsmallfont.render(str(self.mana), 1, (255, 255, 255)).get_rect()[2]
         screen.blit(
             vsmallfont.render(str(self.mana), 1, (255, 255, 255)),
             [pos_1 - 129 - retirer, 95, retirer, 25],
         )
+
+        # Précision (avec symbole %)
         retirer = vsmallfont.render(
             str(self.prec) + "%", 1, (255, 255, 255)
         ).get_rect()[2]
@@ -1446,11 +1584,15 @@ class Night_walker:
             vsmallfont.render(str(self.prec) + "%", 1, (255, 255, 255)),
             [pos_2 - 27 - retirer, 95, retirer, 25],
         )
+
+        # Valeur de la statistique "ombre" (capacité spéciale)
         retirer = vsmallfont.render(str(self.ombre), 1, (255, 255, 255)).get_rect()[2]
         screen.blit(
             vsmallfont.render(str(self.ombre), 1, (255, 255, 255)),
             [pos_2 - 27 - retirer, 115, retirer, 25],
         )
+
+        # Mettre à jour et afficher la barre de vie
         self.BarreDeVie.setPv(self.pv)
         self.BarreDeVie.Affiche()
 
