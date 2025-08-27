@@ -145,7 +145,7 @@ class PosBoutons:
         #     pg.time.delay(5000)
         return btnSize
 
-    def setScreen(self, screen, background = None):
+    def setScreen(self, screen, background=None):
         """
         Met à jour l'écran de référence et recalcule toutes les positions.
 

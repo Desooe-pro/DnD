@@ -114,7 +114,7 @@ class EscapeMenu:
                             "end": 1,
                             "config": self.config,
                             "onglet": self.nav.getNameActive(),
-                            'save': True
+                            "save": True,
                         }
 
                     # Clic sur les boutons d'onglets
@@ -138,7 +138,7 @@ class EscapeMenu:
                                     "end": 1,
                                     "config": self.config,
                                     "onglet": self.nav.getNameActive(),
-                                    "save": False
+                                    "save": False,
                                 }
 
                 if ev.type == pg.KEYDOWN:

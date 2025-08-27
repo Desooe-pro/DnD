@@ -85,8 +85,22 @@ boutons = {
         "",
         GameState.getPosBoutons(),
     ),
-    "bouton_oui": Bouton((2, 6), 2, GameState.getPhrases()["Boucle"]["Possibility"][0], (0, 200, 0), "", GameState.getPosBoutons()),
-    'bouton_non': Bouton((4, 6), 2, GameState.getPhrases()["Boucle"]["Possibility"][1], (200, 0, 0), "", GameState.getPosBoutons())
+    "bouton_oui": Bouton(
+        (2, 6),
+        2,
+        GameState.getPhrases()["Boucle"]["Possibility"][0],
+        (0, 200, 0),
+        "",
+        GameState.getPosBoutons(),
+    ),
+    "bouton_non": Bouton(
+        (4, 6),
+        2,
+        GameState.getPhrases()["Boucle"]["Possibility"][1],
+        (200, 0, 0),
+        "",
+        GameState.getPosBoutons(),
+    ),
 }
 GameState.setBoutons(boutons)
 
@@ -210,9 +224,9 @@ class J:
                                 "attackType"
                             ][2]
 
-                elif ev.type == pg.KEYDOWN :
-                    if ev.key == pg.K_ESCAPE :
-                        if GameState.getMenu() is None :
+                elif ev.type == pg.KEYDOWN:
+                    if ev.key == pg.K_ESCAPE:
+                        if GameState.getMenu() is None:
                             GameState.generateMenu()
                         GameState.setAfficherMenu(True)
                     if ev.key == pg.K_BACKSPACE:
@@ -224,15 +238,15 @@ class J:
                     mana_uti += ev.text  # Ajoute le texte Unicode directement
 
             GameState.afficherBouton("bouton_quit")
-            if GameState.getAfficherMenu() :
+            if GameState.getAfficherMenu():
                 res = GameState.AfficherMenu()
-                if res["end"] == 1 :
+                if res["end"] == 1:
                     newConfig = res["config"]
                     GameState.getMenu().setActive(res["onglet"])
                     GameState.updateGeneral(
                         (int(newConfig["width"]), int(newConfig["height"]))
                     )
-                elif res["end"] == 2 :
+                elif res["end"] == 2:
                     GameState.setAfficherMenu(res["Menu"])
 
             if not (selecAtta):
@@ -530,9 +544,9 @@ class J:
                                 "defenseType"
                             ][2]
 
-                elif ev.type == pg.KEYDOWN :
-                    if ev.key == pg.K_ESCAPE :
-                        if GameState.getMenu() is None :
+                elif ev.type == pg.KEYDOWN:
+                    if ev.key == pg.K_ESCAPE:
+                        if GameState.getMenu() is None:
                             GameState.generateMenu()
                         GameState.setAfficherMenu(True)
                     if ev.key == pg.K_BACKSPACE:
@@ -544,15 +558,15 @@ class J:
                     mana_uti += ev.text  # Ajoute le texte Unicode directement
 
             GameState.afficherBouton("bouton_quit")
-            if GameState.getAfficherMenu() :
+            if GameState.getAfficherMenu():
                 res = GameState.AfficherMenu()
-                if res["end"] == 1 :
+                if res["end"] == 1:
                     newConfig = res["config"]
                     GameState.getMenu().setActive(res["onglet"])
                     GameState.updateGeneral(
                         (int(newConfig["width"]), int(newConfig["height"]))
                     )
-                elif res["end"] == 2 :
+                elif res["end"] == 2:
                     GameState.setAfficherMenu(res["Menu"])
 
             if not (selecDef):
@@ -1059,17 +1073,19 @@ class J:
 
                 elif ev.type == pg.MOUSEBUTTONDOWN:
                     mouse = pg.mouse.get_pos()
-                    if GameState.isOn('bouton_quit', mouse) and GameState.getBoutonState('bouton_quit') not in [
+                    if GameState.isOn(
+                        "bouton_quit", mouse
+                    ) and GameState.getBoutonState("bouton_quit") not in [
                         "Down",
                         "Dead",
-                    ] :
+                    ]:
                         pg.quit()
                         duree = 0
                         sys.exit()
 
-                elif ev.type == pg.KEYDOWN :
-                    if ev.key == pg.K_ESCAPE :
-                        if GameState.getMenu() is None :
+                elif ev.type == pg.KEYDOWN:
+                    if ev.key == pg.K_ESCAPE:
+                        if GameState.getMenu() is None:
                             GameState.generateMenu()
                         GameState.setAfficherMenu(True)
 
@@ -1081,15 +1097,15 @@ class J:
                 joueur.boite_info()
             adv.boite_info()
             GameState.afficherBouton("bouton_quit")
-            if GameState.getAfficherMenu() :
+            if GameState.getAfficherMenu():
                 res = GameState.AfficherMenu()
-                if res["end"] == 1 :
+                if res["end"] == 1:
                     newConfig = res["config"]
                     GameState.getMenu().setActive(res["onglet"])
                     GameState.updateGeneral(
                         (int(newConfig["width"]), int(newConfig["height"]))
                     )
-                elif res["end"] == 2 :
+                elif res["end"] == 2:
                     GameState.setAfficherMenu(res["Menu"])
             pg.display.flip()
             duree -= 1
@@ -1477,17 +1493,19 @@ class Banshee:
 
                 elif ev.type == pg.MOUSEBUTTONDOWN:
                     mouse = pg.mouse.get_pos()
-                    if GameState.isOn('bouton_quit', mouse) and GameState.getBoutonState('bouton_quit') not in [
+                    if GameState.isOn(
+                        "bouton_quit", mouse
+                    ) and GameState.getBoutonState("bouton_quit") not in [
                         "Down",
                         "Dead",
-                    ] :
+                    ]:
                         pg.quit()
                         duree = 0
                         sys.exit()
 
-                elif ev.type == pg.KEYDOWN :
-                    if ev.key == pg.K_ESCAPE :
-                        if GameState.getMenu() is None :
+                elif ev.type == pg.KEYDOWN:
+                    if ev.key == pg.K_ESCAPE:
+                        if GameState.getMenu() is None:
                             GameState.generateMenu()
                         GameState.setAfficherMenu(True)
 
@@ -1499,15 +1517,15 @@ class Banshee:
                 joueur.boite_info()
             self.boite_info()
             GameState.afficherBouton("bouton_quit")
-            if GameState.getAfficherMenu() :
+            if GameState.getAfficherMenu():
                 res = GameState.AfficherMenu()
-                if res["end"] == 1 :
+                if res["end"] == 1:
                     newConfig = res["config"]
                     GameState.getMenu().setActive(res["onglet"])
                     GameState.updateGeneral(
                         (int(newConfig["width"]), int(newConfig["height"]))
                     )
-                elif res["end"] == 2 :
+                elif res["end"] == 2:
                     GameState.setAfficherMenu(res["Menu"])
             pg.display.flip()
             duree -= 1
@@ -1980,16 +1998,18 @@ class Night_walker:
 
                 elif ev.type == pg.MOUSEBUTTONDOWN:
                     mouse = pg.mouse.get_pos()
-                    if GameState.isOn('bouton_quit', mouse) and GameState.getBoutonState('bouton_quit') not in [
+                    if GameState.isOn(
+                        "bouton_quit", mouse
+                    ) and GameState.getBoutonState("bouton_quit") not in [
                         "Down",
                         "Dead",
-                    ] :
+                    ]:
                         pg.quit()
                         duree = 0
                         sys.exit()
-                elif ev.type == pg.KEYDOWN :
-                    if ev.key == pg.K_ESCAPE :
-                        if GameState.getMenu() is None :
+                elif ev.type == pg.KEYDOWN:
+                    if ev.key == pg.K_ESCAPE:
+                        if GameState.getMenu() is None:
                             GameState.generateMenu()
                         GameState.setAfficherMenu(True)
 
@@ -2001,15 +2021,15 @@ class Night_walker:
                 joueur.boite_info()
             self.boite_info()
             GameState.afficherBouton("bouton_quit")
-            if GameState.getAfficherMenu() :
+            if GameState.getAfficherMenu():
                 res = GameState.AfficherMenu()
-                if res["end"] == 1 :
+                if res["end"] == 1:
                     newConfig = res["config"]
                     GameState.getMenu().setActive(res["onglet"])
                     GameState.updateGeneral(
                         (int(newConfig["width"]), int(newConfig["height"]))
                     )
-                elif res["end"] == 2 :
+                elif res["end"] == 2:
                     GameState.setAfficherMenu(res["Menu"])
             pg.display.flip()
             duree -= 1
@@ -2120,8 +2140,8 @@ class Histoire:
                     ) and self.bouton_skip.getstate() not in ["Down", "Dead"]:
                         game_over = False
                 elif ev.type == pg.KEYDOWN:
-                    if ev.key == pg.K_ESCAPE :
-                        if GameState.getMenu() is None :
+                    if ev.key == pg.K_ESCAPE:
+                        if GameState.getMenu() is None:
                             GameState.generateMenu()
                         GameState.setAfficherMenu(True)
                     if ev.key == pg.K_RETURN:
@@ -2216,15 +2236,15 @@ class Histoire:
 
             self.bouton_skip.affiche_bouton()
             self.bouton_quit.affiche_bouton()
-            if GameState.getAfficherMenu() :
+            if GameState.getAfficherMenu():
                 res = GameState.AfficherMenu()
-                if res["end"] == 1 :
+                if res["end"] == 1:
                     newConfig = res["config"]
                     GameState.getMenu().setActive(res["onglet"])
                     GameState.updateGeneral(
                         (int(newConfig["width"]), int(newConfig["height"]))
                     )
-                elif res["end"] == 2 :
+                elif res["end"] == 2:
                     GameState.setAfficherMenu(res["Menu"])
 
             pg.display.flip()
@@ -3194,8 +3214,8 @@ def Jouer():
                         regles = True
 
                 elif ev.type == pg.KEYDOWN:
-                    if ev.key == pg.K_ESCAPE :
-                        if GameState.getMenu() is None :
+                    if ev.key == pg.K_ESCAPE:
+                        if GameState.getMenu() is None:
                             GameState.generateMenu()
                         GameState.setAfficherMenu(True)
                     if ev.key == K_RETURN:
@@ -3209,15 +3229,15 @@ def Jouer():
             info_defence()
             GameState.afficherBouton("bouton_quit")
             GameState.afficherBouton("bouton_compris")
-            if GameState.getAfficherMenu() :
+            if GameState.getAfficherMenu():
                 res = GameState.AfficherMenu()
-                if res["end"] == 1 :
+                if res["end"] == 1:
                     newConfig = res["config"]
                     GameState.getMenu().setActive(res["onglet"])
                     GameState.updateGeneral(
                         (int(newConfig["width"]), int(newConfig["height"]))
                     )
-                elif res["end"] == 2 :
+                elif res["end"] == 2:
                     GameState.setAfficherMenu(res["Menu"])
             pg.display.flip()
 
@@ -3436,7 +3456,11 @@ def JouerBoucle():
     bouton_oui = Bouton((2, 6), "Oui", (0, 200, 0), "", GameState.getPosBoutons())
     bouton_non = Bouton((4, 6), "Non", (200, 0, 0), "", GameState.getPosBoutons())
     while GameState.getRunningBoucle():
-        pg.draw.rect(GameState.getScreen(), (0, 0, 0), [0, 0, GameState.getScreenWidth(), GameState.getScreenHeight()])
+        pg.draw.rect(
+            GameState.getScreen(),
+            (0, 0, 0),
+            [0, 0, GameState.getScreenWidth(), GameState.getScreenHeight()],
+        )
 
         for ev in pg.event.get():
             if ev.type == pg.QUIT:
@@ -3457,9 +3481,9 @@ def JouerBoucle():
                 elif bouton_non.isOn(mouse):
                     GameState.setRunningBoucle(False)
 
-            elif ev.type == pg.KEYDOWN :
-                if ev.key == pg.K_ESCAPE :
-                    if GameState.getMenu() is None :
+            elif ev.type == pg.KEYDOWN:
+                if ev.key == pg.K_ESCAPE:
+                    if GameState.getMenu() is None:
                         GameState.generateMenu()
                     GameState.setAfficherMenu(True)
 
@@ -3566,7 +3590,11 @@ def jouer_bloc():
 
 while GameState.getRunning():
     GameState.getClock().tick(60)
-    pg.draw.rect(GameState.getScreen(), (0, 0, 0), [0, 0, GameState.getScreenWidth(), GameState.getScreenHeight()])
+    pg.draw.rect(
+        GameState.getScreen(),
+        (0, 0, 0),
+        [0, 0, GameState.getScreenWidth(), GameState.getScreenHeight()],
+    )
     for ev in pg.event.get():
         if ev.type == pg.QUIT:
             pg.quit()
@@ -3589,9 +3617,9 @@ while GameState.getRunning():
                     Jouer()
                     ask = True
 
-        elif ev.type == pg.KEYDOWN :
-            if ev.key == pg.K_ESCAPE :
-                if GameState.getMenu() is None :
+        elif ev.type == pg.KEYDOWN:
+            if ev.key == pg.K_ESCAPE:
+                if GameState.getMenu() is None:
                     GameState.generateMenu()
                 GameState.setAfficherMenu(True)
 
@@ -3606,15 +3634,13 @@ while GameState.getRunning():
         afficher_nom_jeu()
         jouer_bloc()
 
-    if GameState.getAfficherMenu() :
+    if GameState.getAfficherMenu():
         res = GameState.AfficherMenu()
-        if res["end"] == 1 :
+        if res["end"] == 1:
             newConfig = res["config"]
             GameState.getMenu().setActive(res["onglet"])
-            GameState.updateGeneral(
-                (int(newConfig["width"]), int(newConfig["height"]))
-            )
-        elif res["end"] == 2 :
+            GameState.updateGeneral((int(newConfig["width"]), int(newConfig["height"])))
+        elif res["end"] == 2:
             GameState.setAfficherMenu(res["Menu"])
 
     pg.display.flip()

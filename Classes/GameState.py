@@ -53,7 +53,9 @@ class GameState:
         self.screenSize = (self.screen.get_width(), self.screen.get_height())
         self.posBoutons.setScreen(self.screen)
         for bouton in self.boutons:
-            self.boutons[bouton].setsize(self.boutons[bouton].getCoords(), self.posBoutons)
+            self.boutons[bouton].setsize(
+                self.boutons[bouton].getCoords(), self.posBoutons
+            )
         self.menu.setParams(
             floor(self.getScreenWidth() / 6),
             floor(self.getScreenHeight() / 6),
