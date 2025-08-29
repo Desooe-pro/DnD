@@ -183,7 +183,7 @@ class GameState:
 
     def setBoutonState(self, nom: str, state: str):
         if nom in self.boutons.keys() and state in ["", "Down", "Dead"]:
-            self.boutons[nom].setState(state)
+            self.boutons[nom].setstate(state)
 
     def setAfficherMenu(self, afficherMenu):
         if type(afficherMenu) is bool:
