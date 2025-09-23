@@ -13,10 +13,11 @@
 
 ### 🚻 [Toilettes](#-sommaire)
     ├─ Niveau savon
+       └─ Vérification journalière à Xh avec la fréquentation moyenne des X dernières semaines pour savoir si dans le temps dont les agents d'entretiens ont besoin pour changer le savon, le savon sera vide afin de prévenir assez à l'avance
     ├─ Niveau papier toilettes
     ├─ Indice de satisfaction
-    └─ Fréquences d'utilisation
-      └─ Détecteur de présence
+    ├─ Fréquences d'utilisation
+       └─ Détecteur de présence
 
 ---
 
