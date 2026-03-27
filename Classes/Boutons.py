@@ -239,18 +239,10 @@ class Bouton:
         self.posBouton = posBouton
         self.screen = self.posBouton.getScreen()
         self.coordinatesXY = coordinates
-        if self.type == 1:
-            self.width, self.height, self.coordinates = posBouton.getDatas(
-                str(self.type), coordinates
-            )
-        elif self.type == 2:
-            self.width, self.height, self.coordinates = posBouton.getDatas(
-                str(self.type), coordinates
-            )
-        elif self.type == 3:
-            self.width, self.height, self.coordinates = posBouton.getDatas(
-                str(self.type), coordinates
-            )
+        # Unified data retrieval for all button types
+        self.width, self.height, self.coordinates = posBouton.getDatas(
+            str(self.type), coordinates
+        )
         self.widthtop = int(self.coordinates[0] - self.width / 2)
         self.heighttop = int(self.coordinates[1] - self.height / 2)
         self.texte = texte
@@ -426,7 +418,7 @@ class Bouton:
         Args:
             state (str): Nouvel état ("", "Down", "Dead")
         """
-        if state in ["", "Down", "Dead"]:
+        if state in ("", "Down", "Dead"):
             self.state = state
 
     def settexte(self, texte):

@@ -2111,6 +2111,7 @@ class Histoire:
         skip = 0
         down = False
         while game_over:
+            print("skip", skip)
             GameState.getClock().tick(30)
             pg.draw.rect(
                 GameState.getScreen(),
@@ -2172,7 +2173,7 @@ class Histoire:
                 if skip >= 45:
                     game_over = False
                 skip += 1
-            elif skip >= 0:
+            elif skip > 0:
                 skip -= 1
             for loop in self.texte:
                 loop.afficher()
@@ -3640,6 +3641,9 @@ while GameState.getRunning():
             newConfig = res["config"]
             GameState.getMenu().setActive(res["onglet"])
             GameState.updateGeneral((int(newConfig["width"]), int(newConfig["height"])))
+            if res.get("save", False):
+                config.sauvegarder_config(newConfig)
+                GameState.setConfig(config.charger_config())
         elif res["end"] == 2:
             GameState.setAfficherMenu(res["Menu"])
 

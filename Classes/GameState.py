@@ -69,7 +69,6 @@ class GameState:
             self.boutons[nom].affiche_bouton()
 
     def generateMenu(self):
-        print("pass")
         self.menu = EscapeMenu(
             floor(self.getScreenWidth() / 6),
             floor(self.getScreenHeight() / 6),
@@ -182,7 +181,7 @@ class GameState:
             self.runningBoucle = running
 
     def setBoutonState(self, nom: str, state: str):
-        if nom in self.boutons.keys() and state in ["", "Down", "Dead"]:
+        if nom in self.boutons and state in ("", "Down", "Dead"):
             self.boutons[nom].setstate(state)
 
     def setAfficherMenu(self, afficherMenu):

@@ -3,6 +3,35 @@ from Classes.Boutons import Bouton, PosBoutons
 from math import floor
 
 
+def make_even(value: float, offset: float = 40) -> int:
+    """Rend une valeur paire en utilisant un décalage donné.
+    
+    Args:
+        value: La valeur à traiter
+        offset: Le décalage à appliquer (par défaut 40)
+    
+    Returns:
+        int: Valeur paire calculée
+    """
+    adjusted = floor(value - offset)
+    return int(adjusted - (adjusted % 2))
+
+
+def make_aligned_dimension(value: float, divisor: int = 1, alignment: int = 10) -> int:
+    """Calcule une dimension alignée (pour boutons).
+    
+    Args:
+        value: La valeur à traiter
+        divisor: Nombre de divisions
+        alignment: Granularité d'alignement (par défaut 10)
+    
+    Returns:
+        int: Valeur alignée calculée
+    """
+    divided = floor(value / divisor) if divisor > 0 else floor(value)
+    return int(divided - (divided % alignment))
+
+
 class EscapeMenu:
     """
     Classe principale du menu d'échappement (menu pause/paramètres).
@@ -42,8 +71,8 @@ class EscapeMenu:
         self.heightpos = heightpos
         self.width = width
         self.height = height
-        self.widthOnglets = int(floor(width - 40) - (floor(width - 40) % 2))
-        self.heightOnglets = int(floor(height - 40) - (floor(height - 40) % 2))
+        self.widthOnglets = make_even(width)
+        self.heightOnglets = make_even(height)
         self.posBouton = PosBoutons(
             self.screen, (self.widthOnglets, self.heightOnglets), "Menu"
         )
@@ -77,22 +106,9 @@ class EscapeMenu:
         """
         running = True
         while running:
-            # Fond noir complet
-            pg.draw.rect(
-                self.screen,
-                (0, 0, 0),
-                (0, 0, self.screen.get_width(), self.screen.get_height()),
-            )
+            self._draw_background()
             ongletActif = self.nav.getNameActive()
             self.bouton.setsize((4, 8), self.posBouton)
-
-            # Fond du menu avec coins arrondis
-            pg.draw.rect(
-                self.screen,
-                (80, 80, 80),
-                [self.widthpos, self.heightpos, self.width, self.height],
-                border_radius=20,
-            )
             self.nav.Afficher(self.activeParam)
             self.bouton.affiche_bouton()
 
@@ -105,47 +121,83 @@ class EscapeMenu:
                 if ev.type == pg.MOUSEBUTTONDOWN:
                     mouse = pg.mouse.get_pos()
 
-                    # Clic sur le bouton Appliquer
-                    if self.bouton.isOn(mouse) and not self.bouton.getstate() in [
-                        "Down",
-                        "Dead",
-                    ]:
-                        return {
-                            "end": 1,
-                            "config": self.config,
-                            "onglet": self.nav.getNameActive(),
-                            "save": True,
-                        }
+                    # Gère le clic sur le bouton Appliquer
+                    result = self._handle_apply_button_click(mouse)
+                    if result is not None:
+                        return result
 
-                    # Clic sur les boutons d'onglets
-                    btns = self.nav.getBoutons()
-                    for loop in range(len(btns)):
-                        if btns[loop].isOn(mouse):
-                            self.setActive(btns[loop].getName())
-                            ongletActif = self.nav.getNameActive()
+                    # Gère les clics sur les boutons d'onglets
+                    if self._handle_tab_clicks(mouse):
+                        ongletActif = self.nav.getNameActive()
 
-                    # Gestion spéciale pour l'onglet Graphisme
-                    if ongletActif == "Graphisme":
-                        AllCoords = self.nav.getSurfaceLignes("Graphisme")
-                        for i in list(AllCoords.keys()):
-                            WL, HL, WR, HR = AllCoords[i]
-                            if WL <= mouse[0] <= WR and HL <= mouse[1] <= HR:
-                                txt = i.split(" (")
-                                x = txt[0].split(" x ")
-                                self.config["width"] = x[0]
-                                self.config["height"] = x[1]
-                                return {
-                                    "end": 1,
-                                    "config": self.config,
-                                    "onglet": self.nav.getNameActive(),
-                                    "save": False,
-                                }
+                    # Gère les clics dans l'onglet Graphisme
+                    result = self._handle_graphics_click(mouse)
+                    if result is not None:
+                        return result
 
                 if ev.type == pg.KEYDOWN:
                     if ev.key == pg.K_ESCAPE:
                         return {"end": 2, "Menu": False}
             pg.display.update()
         return None
+
+    def _handle_apply_button_click(self, mouse):
+        """Gère le clic sur le bouton Appliquer."""
+        if self.bouton.isOn(mouse) and not self.bouton.getstate() in ("Down", "Dead"):
+            return {
+                "end": 1,
+                "config": self.config,
+                "onglet": self.nav.getNameActive(),
+                "save": True,
+            }
+        return None
+
+    def _handle_tab_clicks(self, mouse):
+        """Gère les clics sur les boutons d'onglets."""
+        btns = self.nav.getBoutons()
+        for loop in range(len(btns)):
+            if btns[loop].isOn(mouse):
+                self.setActive(btns[loop].getName())
+                return True
+        return False
+
+    def _handle_graphics_click(self, mouse):
+        """Gère les clics dans l'onglet Graphisme."""
+        ongletActif = self.nav.getNameActive()
+        if ongletActif == "Graphisme":
+            AllCoords = self.nav.getSurfaceLignes("Graphisme")
+            print(AllCoords)
+            for i in list(AllCoords.keys()):
+                WL, HL, WR, HR = AllCoords[i]
+                if WL <= mouse[0] <= WR and HL <= mouse[1] <= HR:
+                    txt = i.split(" (")
+                    x = txt[0].split(" x ")
+                    self.nav.setLigneGraphismeActive(ongletActif, i)
+                    self.config["width"] = x[0]
+                    self.config["height"] = x[1]
+                    return {
+                        "end": 1,
+                        "config": self.config,
+                        "onglet": self.nav.getNameActive(),
+                        "save": True,
+                    }
+        return None
+
+    def _draw_background(self):
+        """Dessine le fond du menu."""
+        # Fond noir complet
+        pg.draw.rect(
+            self.screen,
+            (0, 0, 0),
+            (0, 0, self.screen.get_width(), self.screen.get_height()),
+        )
+        # Fond du menu avec coins arrondis
+        pg.draw.rect(
+            self.screen,
+            (80, 80, 80),
+            [self.widthpos, self.heightpos, self.width, self.height],
+            border_radius=20,
+        )
 
     def setParams(self, widthpos, heightpos, width, height, screen):
         """
@@ -166,8 +218,8 @@ class EscapeMenu:
         self.heightpos = heightpos
         self.width = width
         self.height = height
-        self.widthOnglets = int(floor(width - 40) - (floor(width - 40) % 2))
-        self.heightOnglets = int(floor(height - 40) - (floor(height - 40) % 2))
+        self.widthOnglets = make_even(width)
+        self.heightOnglets = make_even(height)
         if (
             self.widthOnglets != oldWidthOnglets
             or self.heightOnglets != oldHeightOnglets
@@ -183,7 +235,7 @@ class EscapeMenu:
             self.screen,
         )
 
-    def getBouton(self):
+    def getBouton(self, name: str):
         """
         Récupère le bouton "Appliquer" du menu.
 
@@ -201,6 +253,15 @@ class EscapeMenu:
         """
         self.nav.setActive(name)
         self.activeParam = name
+
+    def setConfig(self, configuration):
+        """
+        Met à jour la configuration du menu.
+
+        Args:
+            configuration (dict): Nouvelle configuration chargée
+        """
+        self.config = configuration
 
 
 class NavMenu:
@@ -337,13 +398,9 @@ class NavMenu:
         self.heighttop = heighttop + 20
         self.width = width
         self.height = height
-        self.btnWidth = int(
-            floor(self.width / len(self.optionsNav))
-            - (floor(self.width / len(self.optionsNav)) % 10)
-        )
-        self.btnHeight = int(
-            floor(self.screen.get_height() * 0.055)
-            - (floor(self.screen.get_height() * 0.055) % 10)
+        self.btnWidth = make_aligned_dimension(self.width, len(self.optionsNav), 10)
+        self.btnHeight = make_aligned_dimension(
+            self.screen.get_height() * 0.055, 1, 10
         )
         self.generateBtn()
 
@@ -358,6 +415,9 @@ class NavMenu:
             dict: Dictionnaire des surfaces cliquables pour chaque ligne
         """
         return self.boutons[text].getSurfaceLignes()
+
+    def setLigneGraphismeActive(self, text, ligne):
+        self.boutons[text].page.setLigneGraphismeActive(ligne)
 
     def setActive(self, name):
         """
@@ -669,6 +729,9 @@ class ParamsGraph:
         for loop in self.lignes:
             res[loop.getKey()] = loop.getSurface()
         return res
+
+    def setLigneGraphismeActive(self, key):
+        self.active = key
 
 
 class LigneGraphisme:
