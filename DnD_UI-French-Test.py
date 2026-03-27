@@ -2111,7 +2111,6 @@ class Histoire:
         skip = 0
         down = False
         while game_over:
-            print("skip", skip)
             GameState.getClock().tick(30)
             pg.draw.rect(
                 GameState.getScreen(),

@@ -166,7 +166,6 @@ class EscapeMenu:
         ongletActif = self.nav.getNameActive()
         if ongletActif == "Graphisme":
             AllCoords = self.nav.getSurfaceLignes("Graphisme")
-            print(AllCoords)
             for i in list(AllCoords.keys()):
                 WL, HL, WR, HR = AllCoords[i]
                 if WL <= mouse[0] <= WR and HL <= mouse[1] <= HR:
